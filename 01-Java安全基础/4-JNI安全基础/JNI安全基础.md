@@ -135,3 +135,4 @@ public class ExecTest {
 
 ![image-20220816000522188](JNI安全基础.images/image-20220816000522188.png)
 
+这里通过调用动态链接库里封装的方法，可以去绕过一些限制，例如RASP的限制。
