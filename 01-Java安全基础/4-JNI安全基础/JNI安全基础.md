@@ -192,3 +192,65 @@ public class ExecTest extends ClassLoader {
 ```
 
 ![image-20220816103506715](JNI安全基础.images/image-20220816103506715.png)
+
+上述是通过反射去调用`loadLibrary0()`方法去加载动态链接库，如果直接采用`System.load()`方法去加载则会报错。
+
+具体原因已经有人写过：https://cloud.tencent.com/developer/article/1006269
+
+简单总结就是：因为`System.load()`方法使用的是系统类加载器，而我们则是通过自定义的类加载器去实现，不同的`ClassLoader`去加载类和动态链接库就会导致报错。
+
+和`7herightp4th`师傅交流了一下，他的解决方案是通过反射去调用`Runtime.load0()`方法去实现，我们按照这个思路去走一下。我们跟一下`System.load()`方法
+![image-20220816184153864](JNI安全基础.images/image-20220816184153864.png)
+
+可以看到`System.load()`会调用`Runtime.getRuntime().load0()`方法，因此我们可以通过反射调用该方法来实现`System.load()`的功能，实现代码如下
+```java
+package com.dotast;
+
+import java.lang.reflect.Method;
+
+/**
+ * Created by dotast on 2022/8/15 22:02
+ */
+public class ExecTest extends ClassLoader {
+    // 加载的类名
+    private static String ClassName = "com.dotast.JNIExec";
+    // 加载的类字节码
+    private static byte[] ClassBytes = new byte[]{
+            112, 97, 99, 107, 97, 103, 101, 32, 99, 111, 109, 46, 100, 111, 116, 97, 115, 116, 59, 10, 10, 47, 42, 42, 10, 32, 42, 32, 67, 114, 101, 97, 116, 101, 100, 32, 98, 121, 32, 100, 111, 116, 97, 115, 116, 32, 111, 110, 32, 50, 48, 50, 50, 47, 56, 47, 49, 53, 32, 50, 49, 58, 50, 54, 10, 32, 42, 47, 10, 112, 117, 98, 108, 105, 99, 32, 99, 108, 97, 115, 115, 32, 74, 78, 73, 69, 120, 101, 99, 32, 123, 10, 32, 32, 32, 32, 112, 117, 98, 108, 105, 99, 32, 115, 116, 97, 116, 105, 99, 32, 110, 97, 116, 105, 118, 101, 32, 83, 116, 114, 105, 110, 103, 32, 101, 120, 101, 99, 32, 40, 83, 116, 114, 105, 110, 103, 32, 99, 109, 100, 41, 59, 10, 125, 10
+    };
+    // 重写findClass方法
+    @Override
+    public Class findClass(String name) throws ClassNotFoundException{
+        // 只处理加载的类
+        if(name.equals(ClassName)){
+            // 调用JVM的defineClass定义加载的类
+            return defineClass(ClassName, ClassBytes, 0, ClassBytes.length);
+        }
+        return super.findClass(name);
+    }
+
+    public static void main (String[] args) throws Exception{
+        // 创建自定义类加载器
+        var classLoader = new ExecTest();
+        String cmd = "ls";
+        // 动态链接库的绝对路径
+        String path = ("/xxx/Java_Study/src/com/dotast/libcmd.jnilib");
+        try{
+            // 使用自定义的类加载器加载类
+            Class ExecClass = classLoader.loadClass(ClassName);
+            // 获取loadLibrary0方法
+            Method load0Method = Runtime.class.getDeclaredMethod("load0", Class.class, String.class);
+            load0Method.setAccessible(true);
+            // 将动态链接库加载进虚拟机中
+            load0Method.invoke(Runtime.getRuntime(),ExecClass, path);
+
+            String result = (String) ExecClass.getMethod("exec", String.class).invoke(null, cmd);
+            System.out.println(result);
+        }catch (ClassNotFoundException e){
+            throw new RuntimeException(e);
+        }
+    }
+}
+
+```
+
