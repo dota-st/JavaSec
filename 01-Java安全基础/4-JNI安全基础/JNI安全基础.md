@@ -136,3 +136,59 @@ public class ExecTest {
 ![image-20220816000522188](JNI安全基础.images/image-20220816000522188.png)
 
 这里通过调用动态链接库里封装的方法，可以去绕过一些限制，例如RASP的限制。
+
+当然，正常情况下我们是没有`JNIExec`这个类的，所以我们需要通过类加载机制去实现，实现代码如下
+```java
+package com.dotast;
+
+import java.io.File;
+import java.lang.reflect.Method;
+
+/**
+ * Created by dotast on 2022/8/15 22:02
+ */
+public class ExecTest extends ClassLoader {
+    // 加载的类名
+    private static String ClassName = "com.dotast.JNIExec";
+    // 加载的类字节码
+    private static byte[] ClassBytes = new byte[]{
+            112, 97, 99, 107, 97, 103, 101, 32, 99, 111, 109, 46, 100, 111, 116, 97, 115, 116, 59, 10, 10, 47, 42, 42, 10, 32, 42, 32, 67, 114, 101, 97, 116, 101, 100, 32, 98, 121, 32, 100, 111, 116, 97, 115, 116, 32, 111, 110, 32, 50, 48, 50, 50, 47, 56, 47, 49, 53, 32, 50, 49, 58, 50, 54, 10, 32, 42, 47, 10, 112, 117, 98, 108, 105, 99, 32, 99, 108, 97, 115, 115, 32, 74, 78, 73, 69, 120, 101, 99, 32, 123, 10, 32, 32, 32, 32, 112, 117, 98, 108, 105, 99, 32, 115, 116, 97, 116, 105, 99, 32, 110, 97, 116, 105, 118, 101, 32, 83, 116, 114, 105, 110, 103, 32, 101, 120, 101, 99, 32, 40, 83, 116, 114, 105, 110, 103, 32, 99, 109, 100, 41, 59, 10, 125, 10
+    };
+    // 重写findClass方法
+    @Override
+    public Class findClass(String name) throws ClassNotFoundException{
+        // 只处理加载的类
+        if(name.equals(ClassName)){
+            // 调用JVM的defineClass定义加载的类
+            return defineClass(ClassName, ClassBytes, 0, ClassBytes.length);
+        }
+        return super.findClass(name);
+    }
+
+    public static void main (String[] args) throws Exception{
+        // 创建自定义类加载器
+        var classLoader = new ExecTest();
+        String cmd = "open -a Calculator.app";
+        File libPath = new File("src/com/dotast/libcmd.jnilib");
+        try{
+            // 使用自定义的类加载器加载类
+            Class ExecClass = classLoader.loadClass(ClassName);
+            // 使用反射创建JNIExec类
+            Object execInstance = ExecClass.newInstance();
+            // 获取loadLibrary0方法
+            Method loadLibrary0Method = ClassLoader.class.getDeclaredMethod("loadLibrary0", Class.class, File.class);
+            loadLibrary0Method.setAccessible(true);
+            // 将动态链接库加载进虚拟机中
+            loadLibrary0Method.invoke(execInstance,ExecClass, libPath);
+
+            String result = (String) ExecClass.getMethod("exec", String.class).invoke(null, cmd);
+            System.out.println(result);
+        }catch (ClassNotFoundException e){
+            throw new RuntimeException(e);
+        }
+    }
+}
+
+```
+
+![image-20220816103506715](JNI安全基础.images/image-20220816103506715.png)
