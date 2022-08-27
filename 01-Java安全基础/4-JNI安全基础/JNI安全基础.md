@@ -254,3 +254,6 @@ public class ExecTest extends ClassLoader {
 
 ```
 
+## JNI在jsp中的应用
+
+可能因为我的 mac 是 m1 芯片的原因一直没成功，暂且搁置...
