@@ -38,9 +38,9 @@ JDK 10 移除了`javah`,需要改为`javac`加`-h`参数的方式生产头文件
 ```
 
 当前目录生成`.class`文件和`.h`头文件
-![image-20220815213424319](JNI安全基础.images/image-20220815213424319.png)
+![image-20220815213424319](images/image-20220815213424319.png)
 
-![image-20220815214055565](JNI安全基础.images/image-20220815214055565.png)
+![image-20220815214055565](images/image-20220815214055565.png)
 
 其中的`Java_com_dotast_JNIExec_exec`前面的`Java`是固定的，后面则是类名和方法名。
 
@@ -133,7 +133,7 @@ public class ExecTest {
 
 ```
 
-![image-20220816000522188](JNI安全基础.images/image-20220816000522188.png)
+![image-20220816000522188](images/image-20220816000522188.png)
 
 这里通过调用动态链接库里封装的方法，可以去绕过一些限制，例如RASP的限制。
 
@@ -191,7 +191,7 @@ public class ExecTest extends ClassLoader {
 
 ```
 
-![image-20220816103506715](JNI安全基础.images/image-20220816103506715.png)
+![image-20220816103506715](images/image-20220816103506715.png)
 
 上述是通过反射去调用`loadLibrary0()`方法去加载动态链接库，如果直接采用`System.load()`方法去加载则会报错。
 
@@ -200,7 +200,7 @@ public class ExecTest extends ClassLoader {
 简单总结就是：因为`System.load()`方法使用的是系统类加载器，而我们则是通过自定义的类加载器去实现，不同的`ClassLoader`去加载类和动态链接库就会导致报错。
 
 和`7herightp4th`师傅交流了一下，他的解决方案是通过反射去调用`Runtime.load0()`方法去实现，我们按照这个思路去走一下。我们跟一下`System.load()`方法
-![image-20220816184153864](JNI安全基础.images/image-20220816184153864.png)
+![image-20220816184153864](images/image-20220816184153864.png)
 
 可以看到`System.load()`会调用`Runtime.getRuntime().load0()`方法，因此我们可以通过反射调用该方法来实现`System.load()`的功能，实现代码如下
 ```java

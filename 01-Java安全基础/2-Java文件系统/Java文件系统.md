@@ -3,7 +3,7 @@
 ## 概念
 
 在Java SE中内置了两类文件系统：`java.io`和`java.nio`，`java.nio`的实现是`sun.nio`，文件系统底层的API实现如下图：
-![img](Java文件系统.images/image-20201113121413510.png)
+![img](images/image-20201113121413510.png)
 
 Java存在一个文件系统的对象：`java.io.FileSystem`，对于不同的操作系统有不一样的文件系统,例如`Windows`和`Unix`就是两种不一样的文件系统： `java.io.UnixFileSystem`、`java.io.WinNTFileSystem`。
 

@@ -75,7 +75,7 @@ public class ReflectionFactoryTest {
 }
 ```
 
-![image-20220829150934435](Java反序列化.images/image-20220829150934435.png)
+![image-20220829150934435](images/image-20220829150934435.png)
 
 ### 核心方法
 
@@ -163,7 +163,7 @@ public class Main {
 }
 ```
 
-![image-20220829154016718](Java反序列化.images/image-20220829154016718.png)
+![image-20220829154016718](images/image-20220829154016718.png)
 
 `java.io.Serializable`是一个空的接口，实现该接口的作用是用于**标识该类可序列化**。实现了`java.io.Serializable`接口的类原则上都需要产生一个`serialVersionUID`常量，反序列化时如果双方的`serialVersionUID`不一致会导致`InvalidClassException`异常。如果可序列化类未显示声明`serialVersionUID`，则序列化运行时将基于该类的各个方面计算默认`serialVersionUID`值。
 
@@ -259,7 +259,7 @@ public class Main {
 }
 ```
 
-![image-20220829162019434](Java反序列化.images/image-20220829162019434.png)
+![image-20220829162019434](images/image-20220829162019434.png)
 
 运行后，除了正常对类对象的序列化与反序列化之外，还执行了我们重写的`writeObject`方法里的命令执行代码。
 
@@ -303,7 +303,7 @@ public class User implements Externalizable {
 ```
 
 主类`Main`和前面一样保持不变
-![image-20220829170100690](Java反序列化.images/image-20220829170100690.png)
+![image-20220829170100690](images/image-20220829170100690.png)
 
 ## 常见的魔术方法
 
@@ -415,6 +415,7 @@ public class Main {
 ```
 
 运行结果：
-![image-20220829180709106](Java反序列化.images/image-20220829180709106.png)
+![image-20220829180709106](images/image-20220829180709106.png)
 
 可以看到，在进行序列化的时候，本来序列化的是`Admin`类，由于`writeReplace()`方法的存在变成了序列化`User`类；而`User`类中定义的`name`为变量的值为`dotast`，在进行反序列化的时候，由于`readResolve()`方法的存在，`name`变量的值替换成了`admin`。
+
