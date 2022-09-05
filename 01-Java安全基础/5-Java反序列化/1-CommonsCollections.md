@@ -246,3 +246,15 @@ new InvokerTransformer(
 传入的`Runtime`实例通过`getClass()`获取到`Runtime`类，接着通过反射获取到`exec()`方法，最后通过`invoke()`执行传进来的`iArgs`命令
 
 至此通过`ChainedTransformer`类，把`ConstantTransformer`类和多个`InvokerTransformer`类实现的`transform`方法一一执行，完成命令执行的利用链。
+
+### TransformedMap
+
+上述虽然构造了一串巧妙的命令执行利用链，但是仍然遗留下未解决的问题：需要转换对象成`ChainedTransformer`类型接着执行`transform()`方法
+![image-20220905223858552](images/image-20220905223858552.png)
+
+所以我们需要解决以下问题：
+
+1. 传入恶意的的`ChainedTransformer`类
+2. 调用`ChainedTransformer`类创建的对象`chainedTransformer`的`transformer()`方法执行命令
+
+这里引入`TransformedMap`类，`org.apache.commons.collections.map.TransformedMap`类间接的实现了`java.util.Map`接口，同时支持对`Map`的`key`或者`value`进行`Transformer`转换
