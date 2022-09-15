@@ -500,3 +500,28 @@ public class TransformerTest {
 
 ![image-20220914115903758](images/image-20220914115903758.png)
 
+这里需要注意`map.put("value","value");`中的`key`必须为`value`。**具体原因如下：**
+
+在构造方法中我们传入的`Class`需要继承`Annotation`注解
+![image-20220915111210005](images/image-20220915111210005.png)
+
+因此在 POC 里，我们构造攻击链的时候传入了 Java 标准库中的`Target.class`元注解
+```java
+// 创建含有攻击链的AnnotationInvocationHandler类实例
+Object instance = constructor.newInstance(Target.class, transformedMap);
+```
+
+查看`@Target`元注解的源码，其中已经定义了参数元素为`value`
+![image-20220915111849960](images/image-20220915111849960.png)
+
+在`AnnotationInvocationHandler`类的`readObject()`方法中，`var2 = AnnotationType.getInstance(this.type);`对`Target`元注解进行了处理，随后传到了`Map`类型参数`var3`中
+
+![image-20220915000423127](images/image-20220915000423127.png)
+
+随后在`var6`中取得了我们前面设置的`map.put("value","value");`的`key`，也就是`value`，接着在`var7`中获得的类`java.lang.annotation.ElementType`不为空满足`if`条件进入循环。
+
+由此可得知，如果我们传入的是`@Target`元注解，我们构造的条件要满足：`map.put("value",xxxx);`才能进入`if`条件里触发命令执行。
+
+**该条攻击利用链的限制**
+
+JDK 版本需要在 8u71 之前，在此之后的版本都无法触发命令执行，原因是`AnnotationInvocationHandler`类的`readObject()`方法中没有了`setValue`语句对`Map`数据进行操作。

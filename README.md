@@ -24,3 +24,8 @@
 └── 参考链接.md
 ```
 
+## 反序列化专区
+
+- [Java反序列化基础](./01-Java安全基础/5-Java反序列化/0-Java反序列化.md)
+- [CommonsCollections链分析](./01-Java安全基础/5-Java反序列化/1-CommonsCollections.md)
+
