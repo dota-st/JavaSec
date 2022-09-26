@@ -24,8 +24,7 @@
 ├── 02-反序列化专区
 │   ├── 0-URLDNS利用链
 │   ├── 1-CommonsCollections
-│   ├── 2-CommonsCollections1
-│   └── images
+│   └── 2-CommonsCollections1
 ├── README
 └── 参考链接
 ```
