@@ -6,6 +6,8 @@
 
 在`Commons Collections`中实现了一个`TransformedMap类`，该类是对 Java 标准数据结构类型`Map`接口的一个扩展。该类可以在一个元素被加入到集合内时，自动对该元素进行特定的修饰变化，而具体的变换逻辑则由`Transformer`类定义，`Transformer`在`TransformedMap`实例化时作为参数传入。
 
+本条链子的利用版本限制：`CommonsCollections 3.1 - 3.2.1`
+
 ## 接口类和实现类
 
 ### Transformer
@@ -524,4 +526,4 @@ Object instance = constructor.newInstance(Target.class, transformedMap);
 
 **该条攻击利用链的限制**
 
-JDK 版本需要在 8u71 之前，在此之后的版本都无法触发命令执行，原因是`AnnotationInvocationHandler`类的`readObject()`方法中没有了`setValue`语句对`Map`数据进行操作。
+JDK 版本需要在 8u71 之前（本文 JDK 版本为），在此之后的版本都无法触发命令执行，原因是`AnnotationInvocationHandler`类的`readObject()`方法中没有了`setValue`语句对`Map`数据进行操作，当然最重要的原因是因为不能对我们传入的`Map`进行操作，而非没有`setValue()`语句的原因。
