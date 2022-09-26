@@ -29,6 +29,6 @@
 
 - [Java反序列化基础](./01-Java安全基础/5-Java反序列化/0-Java反序列化.md)
 - [URLDNS利用链分析](./01-Java安全基础/5-Java反序列化/1-URLDNS利用链.md)
-- [CommonsCollections链分析](./01-Java安全基础/5-Java反序列化/2-CommonsCollections.md)
-- [CommonsCollections1链分析](./01-Java安全基础/5-Java反序列化/3-CommonsCollections1.md)
+- [CommonsCollections利用链分析](./01-Java安全基础/5-Java反序列化/2-CommonsCollections.md)
+- [CommonsCollections1利用链分析](./01-Java安全基础/5-Java反序列化/3-CommonsCollections1.md)
 
