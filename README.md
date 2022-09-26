@@ -20,7 +20,8 @@
 │   ├── 2-Java文件系统
 │   ├── 3-Java命令执行
 │   ├── 4-JNI安全基础
-│   └── 5-Java反序列化
+│   ├── 5-Java反序列化
+│   └── 6-JShell
 ├── 02-反序列化专区
 │   ├── 0-URLDNS利用链
 │   ├── 1-CommonsCollections
