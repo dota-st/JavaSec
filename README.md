@@ -26,7 +26,8 @@
 ├── 02-反序列化专区
 │   ├── 0-URLDNS利用链
 │   ├── 1-CommonsCollections
-│   └── 2-CommonsCollections1
+│   ├── 2-CommonsCollections1
+│   └── 3-CommonsCollections6
 ├── README.md
 └── 参考链接.md
 ```
@@ -35,6 +36,7 @@
 
 - [Java反序列化基础](./01-Java安全基础/5-Java反序列化/Java反序列化.md)
 - [URLDNS利用链分析](./02-反序列化专区/0-URLDNS利用链/URLDNS利用链.md)
-- [CommonsCollections利用链分析](./02-反序列化专区/1-CommonsCollections/CommonsCollections.md)
-- [CommonsCollections1利用链分析](./02-反序列化专区/2-CommonsCollections1/CommonsCollections1.md)
+- [CommonsCollections 利用链分析](./02-反序列化专区/1-CommonsCollections/CommonsCollections.md)
+- [CommonsCollections1 利用链分析](./02-反序列化专区/2-CommonsCollections1/CommonsCollections1.md)
+- [CommonsCollections6 利用链分析](./02-反序列化专区/3-CommonsCollections6/CommonsCollections6.md)
 

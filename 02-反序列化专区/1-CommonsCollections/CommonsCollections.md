@@ -505,7 +505,7 @@ public class TransformerTest {
 这里需要注意`map.put("value","value");`中的`key`必须为`value`。**具体原因如下：**
 
 在构造方法中我们传入的`Class`需要继承`Annotation`注解
-![image-20220915111210005](images/image-20220915111210005.png)
+![image-20221004170152670](images/image-20221004170152670.png)
 
 因此在 POC 里，我们构造攻击链的时候传入了 Java 标准库中的`Target.class`元注解
 ```java
@@ -514,7 +514,7 @@ Object instance = constructor.newInstance(Target.class, transformedMap);
 ```
 
 查看`@Target`元注解的源码，其中已经定义了参数元素为`value`
-![image-20220915111849960](images/image-20220915111849960.png)
+![image-20221004170044091](images/image-20221004170044091.png)
 
 在`AnnotationInvocationHandler`类的`readObject()`方法中，`var2 = AnnotationType.getInstance(this.type);`对`Target`元注解进行了处理，随后传到了`Map`类型参数`var3`中
 
@@ -526,4 +526,6 @@ Object instance = constructor.newInstance(Target.class, transformedMap);
 
 **该条攻击利用链的限制**
 
-JDK 版本需要在 8u71 之前（本文 JDK 版本为），在此之后的版本都无法触发命令执行，原因是`AnnotationInvocationHandler`类的`readObject()`方法中没有了`setValue`语句对`Map`数据进行操作，当然最重要的原因是因为不能对我们传入的`Map`进行操作，而非没有`setValue()`语句的原因。
+JDK 版本需要在 8u71 之前（本文 JDK 版本为 8u60），在此之后的版本都无法触发命令执行，原因是`AnnotationInvocationHandler`类的`readObject()`方法进行了修改，不再直接使用反序列化得到的`Map`进行操作，而是新建了一个`LinkedHashMap`对象。
+
+后续相关操作都基于`LinkedHashMap`对象，而我们构造的`map`不再执行`put()`或者`setValue()`，因此无法触发命令执行。

