@@ -27,7 +27,8 @@
 │   ├── 0-URLDNS利用链
 │   ├── 1-CommonsCollections
 │   ├── 2-CommonsCollections1
-│   └── 3-CommonsCollections6
+│   ├── 3-CommonsCollections6
+│   └── 4-CommonsCollections2
 ├── README.md
 └── 参考链接.md
 ```
@@ -39,4 +40,5 @@
 - [CommonsCollections 利用链分析](./02-反序列化专区/1-CommonsCollections/CommonsCollections.md)
 - [CommonsCollections1 利用链分析](./02-反序列化专区/2-CommonsCollections1/CommonsCollections1.md)
 - [CommonsCollections6 利用链分析](./02-反序列化专区/3-CommonsCollections6/CommonsCollections6.md)
+- [CommonsCollections2 利用链分析](./02-反序列化专区/4-CommonsCollections2/CommonsCollections2.md)
 
