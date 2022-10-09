@@ -455,4 +455,7 @@ public class CommonsCollections6 {
 */
 ```
 
-对比前面的，可以发现`ysoserial`采用的是`HashSet`
+对比前面的，可以发现`ysoserial`采用的是`HashSet`，在`HashSet#readObject()`方法中最后会调用到`HashMap#put()`
+![image-20221009103459255](images/image-20221009103459255.png)
+
+而通过前面的分析，我们知道`HashMap#put()`最终也会调用到`hashCode()`方法，这里就不赘述了。
