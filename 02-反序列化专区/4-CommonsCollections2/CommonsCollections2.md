@@ -225,7 +225,6 @@ public class CommonsCollections2 {
         evailClass.makeClassInitializer().insertBefore(cmd);
         evailClass.setSuperclass(pool.get(AbstractTranslet.class.getName()));
         // 转换成字节码
-        evailClass.writeFile();
         byte[] classBytes = evailClass.toBytecode();
         byte[][] targetByteCodes = new byte[][]{classBytes};
         TemplatesImpl templates = TemplatesImpl.class.newInstance();
