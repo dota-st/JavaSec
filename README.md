@@ -30,7 +30,8 @@
 │   ├── 3-CommonsCollections6
 │   ├── 4-CommonsCollections2
 │   ├── 5-CommonsCollections3
-│   └── 6-CommonsCollections4
+│   ├── 6-CommonsCollections4
+│   └── 7-CommonsCollections5
 ├── README.md
 └── 参考链接.md
 ```
@@ -45,4 +46,5 @@
 - [CommonsCollections2 利用链分析](./02-反序列化专区/4-CommonsCollections2/CommonsCollections2.md)
 - [CommonsCollections3 利用链分析](./02-反序列化专区/5-CommonsCollections3/CommonsCollections3.md)
 - [CommonsCollections4 利用链分析](./02-反序列化专区/6-CommonsCollections4/CommonsCollections4.md)
+- [CommonsCollections5 利用链分析](./02-反序列化专区/7-CommonsCollections5/CommonsCollections5.md)
 
