@@ -189,5 +189,18 @@ b:  z->122 ？-> 122*31 + ？  = 3872  -> ? = 90
 
 - 为什么最后要`remove("yy")`？
 
-晚点写，吃饭先
+问题出在`AbstractMap#equals()`方法里，`size()`的值为 1，而`m.size()`的值为 2，所以我们需要`remove`掉一个使其相等。
+![image-20221012102519876](images/image-20221012102519876.png)
 
+那么还剩一下问题，为什么是`lazyMap2.remove("yy");`？
+
+在`Hashtable#put()`方法时也会调用一次`entry.key.equals(key)`
+![image-20221012103923937](images/image-20221012103923937.png)
+
+因此在`hashtable.put(lazyMap2, 2);`之后跟到`AbstractMap()#equals()`方法
+![image-20221012104621160](images/image-20221012104621160.png)
+
+这里可以看到，传入`LazyMap#get(key)`中的 key 为`yy`，继续跟进`LazyMap#get()`方法
+![image-20221012104834141](images/image-20221012104834141.png)
+
+最后因为`lazyMap2`中并没有`yy`这个`key`，因此会执行一个`map.put("yy","yy")`的操作添加，所以在 POC 中，我们最后要把`lazyMap2`的`yy`给删除掉。
