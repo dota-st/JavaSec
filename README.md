@@ -1,8 +1,10 @@
-# JavaSec学习笔记
+# JavaSec学习笔记📝
 
 ## 碎碎念
 
-一个存储自己学习 Java 安全的笔记仓库，如果也恰好对你有所帮助，欢迎贡献一个⭐️。
+一个存储自己学习 Java 安全的笔记仓库，目录所思随所欲，无法作为严谨的系统学习路线，仅供参考。
+
+如果本文也恰好对你有所帮助，不妨留下你的⭐️。
 
 ## 目录
 
@@ -34,6 +36,8 @@
 │   ├── 7-CommonsCollections5
 │   ├── 8-CommonsCollections7
 │   └── 9-CommonsCollections11
+├── 03-shiro专区
+│   └── 0-shiro之CVE-2010-3863
 ├── README.md
 └── 参考链接.md
 ```
@@ -51,4 +55,8 @@
 - [CommonsCollections5 利用链分析](./02-反序列化专区/7-CommonsCollections5/CommonsCollections5.md)
 - [CommonsCollections7 利用链分析](./02-反序列化专区/8-CommonsCollections7/CommonsCollections7.md)
 - [CommonsCollections11 利用链分析](./02-反序列化专区/9-CommonsCollections11/CommonsCollections11.md)
+
+## Shiro专区
+
+- [CVE-2010-3863漏洞分析](./03-shiro专区/0-shiro之CVE-2010-3863/CVE-2010-3863.md)
 
