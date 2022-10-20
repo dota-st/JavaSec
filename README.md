@@ -38,7 +38,8 @@
 │   └── 9-CommonsCollections11
 ├── 03-shiro专区
 │   ├── 0-shiro之CVE-2010-3863
-│   └── 1-shiro之CVE-2016-4437
+│   ├── 1-shiro之CVE-2016-4437
+│   └── 2-shiro之CVE-2016-6802
 ├── README.md
 └── 参考链接.md
 ```
@@ -61,4 +62,5 @@
 
 - [CVE-2010-3863（权限绕过）漏洞分析](./03-shiro专区/0-shiro之CVE-2010-3863/CVE-2010-3863.md)
 - [CVE-2016-4437（shiro-550）漏洞分析](./03-shiro专区/1-shiro之CVE-2016-4437/CVE-2016-4437.md)
+- [CVE-2016-6802（权限绕过）漏洞分析](./03-shiro专区/2-shiro之CVE-2016-6802/CVE-2016-6802.md)
 
