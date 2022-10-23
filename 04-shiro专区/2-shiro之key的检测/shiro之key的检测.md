@@ -27,7 +27,7 @@ kPH+bIxk5D2deZiIxcaaaA==
 
 言归正传，说回 Key 的检测，第一想法都是用 URLDNS 这条链子来进行检测。但实战环境中，很多时候遇上的主机都是不出网，这种情况如何解决呢？
 
-L1NK3R 师傅提出的只依赖于 Shiro 本身，在 Key 检测正确时返回 deleteMe，错误情况时返回 deleteMe 的方法，解决了上述不出网的情况。下面就逐个进行学习一下。
+L1NK3R 师傅提出的只依赖于 Shiro 本身，在 CipherKey 检测正确时不返回 deleteMe，错误情况时返回 deleteMe 的方法，解决了上述不出网的情况。下面就逐个进行学习一下。
 
 ## 基于URLDNS的检测方法
 
