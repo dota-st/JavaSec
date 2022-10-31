@@ -67,24 +67,24 @@ public class FilterTest implements Filter {
 初始化了`ApplicationFilterChain`对象，继续往下走
 ![image-20221031161929404](images/image-20221031161929404.png)
 
-接下来获取到了`StandardContext`类对象`context`，并从`cotext`中拿到了`filterMaps`数组，继续往下走
+接下来获取到了`StandardContext`类对象`context`，并通过`context.findFilterMaps()`方法拿到了`filterMaps`数组，继续往下走
 ![image-20221031162125403](images/image-20221031162125403.png)
 
-请求的路径和`filterMap`设置的规则进行匹配，如果满足则进入 if 条件中，接着根据`filterMap`对象中存储的`filter`名称在`StandardContext`类的`filterConfigs`进行寻找，如果不为空则通过`addFilter()`方法添加到`filterChain`的属性中
+在 if 条件中，请求路径和`filterMap`设置的规则进行匹配，如果满足则进入 if 条件中，接着根据`filterMap`对象中存储的`filter`名称在`StandardContext`类的`filterConfigs`寻找`filterConfig`，如果不为空则通过`addFilter()`方法添加到`filterChain`的属性中
 ![image-20221031162208826](images/image-20221031162208826.png)
 
-`addFilter()`方法源码如上图所示，逻辑就是进行了去除和扩容添加。
+`addFilter()`方法源码如上图所示，代码逻辑就是进行了去重、扩容并添加`filterConfig`。
 
 最后回到`StandardWrapperValve`类中往下走
 ![image-20221031151815580](images/image-20221031151815580.png)
 
-跟进`filterChain.doFilter()`方法
+跟进`filterChain.doFilter()`方法中
 ![image-20221031151928083](images/image-20221031151928083.png)
 
-跟进`internalDoFilter()`方法
+继续跟进`internalDoFilter()`方法
 ![image-20221031152051403](images/image-20221031152051403.png)
 
-创建了`ApplicationFilterConfig`类对象`filterConfig`，然后通过`filterConfig.getFilter()`方法取出`filter`，接着调用`filter.doFilter()`方法，跟进后就是我们编写的恶意类
+创建了`ApplicationFilterConfig`类对象`filterConfig`，然后通过`filterConfig.getFilter()`方法取出`filter`，接着调用`filter.doFilter()`方法，跟进后就是我们编写的恶意类`FilterTest`
 ![image-20221031152224431](images/image-20221031152224431.png)
 
 至此步骤算是走完了，总结一下流程：
@@ -130,7 +130,7 @@ public class FilterTest implements Filter {
 
 `filterConfigs`存储着当前的上下文`StandardContext`（WEB 应用），`filter`对象和`filterDef`等等信息。
 
-经过前面的分析，我们可以通过控制上述三个属性的内容进行动态添加恶意 Filter 的思路：
+经过前面的分析，我们可以通过控制上述三个属性的内容达到动态添加恶意 Filter 的目的， 思路如下：
 
 1. 编写恶意的 Filter 实现类；
 2. 获取`StandardContext`对象；
