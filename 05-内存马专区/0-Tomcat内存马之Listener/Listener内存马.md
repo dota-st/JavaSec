@@ -105,7 +105,9 @@ public class ListenerTest implements ServletRequestListener {
 那么如何获取到`request`类呢？在`requestInitialized()`方法中预设给我们传入了`ServletRequestEvent `对象，我们跟进看看
 ![image-20221028115757707](images/image-20221028115757707.png)
 
-这里存在一个`ServletRequest`类型的`request`字段，并且通过`getServletRequest()`方法可以拿到，而`Request`类也是实现了`ServletRequest`接口。
+这里存在一个`ServletRequest`类型的`request`字段，并且通过`getServletRequest()`方法可以拿到，而`servletRequestEvent`类可以转换成`HttpServletRequest`类型接口。
+
+`HttpServletRequest`类接口是继承`ServletRequest`接口，而`Request`类是`HttpServletRequest`接口的实现类。
 
 因此我们可以通过反射拿到`ServletRequest`类中的`request`实例，然后经过强转类型获得`Request`对象类型
 ```java
@@ -243,3 +245,15 @@ public class ListenerTest implements ServletRequestListener {
 
 接着访问其他路由都可以成功执行命令
 ![image-20221028161520448](images/image-20221028161520448.png)
+
+## 内存马的查杀排查
+
+这里使用的回忆飘如雪师傅写的内存马查杀 JSP 脚本
+```
+https://github.com/c0ny1/java-memshell-scanner
+```
+
+这里扫描到我们构造的 Listener 内存马，并且提供了 dump 操作供我们检查和 kill 操作供我们进行删除。
+![image-20221029101459352](images/image-20221029101459352.png)
+
+除此之外我们也可以通过日志进行排查，首先上传的内存马大多都会执行命令，如果存在大量执行了命令但返回状态码为 404 或者 200 的记录可重点进行排查。
