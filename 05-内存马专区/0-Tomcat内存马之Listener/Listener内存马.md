@@ -175,7 +175,7 @@ public class ListenerTest implements ServletRequestListener {
 可以看到，`applicationEventListenersList`字段已经存储了我们的`ListenerTest`类
 ![image-20221027225147776](images/image-20221027225147776.png)
 
-也就是之前已经将`ListenerTest`类注册进了 Tomcat 服务器，既然是添加我们的恶意类到`applicationEventListenersList`列表中，那么一定会有一个添加的方法，尝试在该类中全局搜索`pplicationEventListenersList`关键字，最后定位到了`addApplicationEventListener()`方法
+也就是之前已经将`ListenerTest`类注册进了 Tomcat 服务器，既然是添加我们的恶意类到`applicationEventListenersList`列表中，那么一定会有一个添加的方法，尝试在该类中全局搜索`applicationEventListenersList`关键字，最后定位到了`addApplicationEventListener()`方法
 ![image-20221027225815382](images/image-20221027225815382.png)
 
 因此我们可以通过`addApplicationEventListener()`方法去将我们的恶意类添加到`listener`中进行注册，接下来继续跟着方法往下走
