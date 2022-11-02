@@ -55,7 +55,7 @@
 
 ## 环境&其他
 
-- [Tomcat源码调试](../../环境&其他/Tomcat源码调试/Tomcat源码调试.md)
+- [Tomcat源码调试](./环境&其他/Tomcat源码调试/Tomcat源码调试.md)
 
 ## 反序列化专区
 
