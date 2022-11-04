@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class tool {
     public static void main(String[] args){
         var fun = new Fun();
-        byte[] kk = fun.fileConvertToByteArray(new File("src/TestExp.java"));
+        byte[] kk = fun.fileConvertToByteArray(new File("src/TestExp.class"));
         System.out.println(Arrays.toString(kk));
     }
 
