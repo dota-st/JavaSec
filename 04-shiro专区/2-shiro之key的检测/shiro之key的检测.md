@@ -116,7 +116,7 @@ public class Shiro550 {
 
 ## 基于Shiro本身的检测方法
 
-经过测试我们可以看到，在登录后携带正常的 rememberMe 发送请求并不会在返回包中存在`rememberMe=deleteMe`，但使用正确或者错误的 CipherKey 加密构造的 rememberMe 在发送请求后，都会在返回包中看到`rememberMe=deleteMe`的响应头。
+经过测试我们可以看到，在登录后携带正常的 rememberMe 发送请求并不会在返回包中存在`rememberMe=deleteMe`，但我们使用正确或者错误的 CipherKey 加密构造的 rememberMe 在发送请求后，都会在返回包中看到`rememberMe=deleteMe`的响应头。
 
 那么如果我们能够使正确的 CipherKey 加密的 payload 执行后不回显`deleteMe`，错误的 CipherKey 加密的则回显`deleteMe`，那就能达到检测 CipherKey 是否正确的目的。
 

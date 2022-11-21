@@ -49,7 +49,8 @@
 ├── 05-内存马专区
 │   ├── 0-Tomcat内存马之Listener
 │   ├── 1-Tomcat内存马之Filter
-│   └── 2-Tomcat内存马之Servlet
+│   ├── 2-Tomcat内存马之Servlet
+│   └── 3-反序列化注入内存马
 ├── README.md
 ├── 环境&其他
 │   └── Tomcat源码调试
@@ -87,4 +88,5 @@
 - [Tomcat内存马之Listener](./05-内存马专区/0-Tomcat内存马之Listener/Listener内存马.md)
 - [Tomcat内存马之Filter](./05-内存马专区/1-Tomcat内存马之Filter/Filter内存马.md)
 - [Tomcat内存马之Servlet](./05-内存马专区/2-Tomcat内存马之Servlet/Servlet内存马.md)
+- [反序列化注入内存马](./05-内存马专区/3-反序列化注入内存马/反序列化注入内存马.md)
 
