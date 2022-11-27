@@ -116,6 +116,12 @@ public class ServletTest extends HttpServlet {
 
 只有`LoadOnStartup`属性值大于 0 的时候，被`list.add()`方法添加到`list`中，最后才会被`wrapper.load()`方法加载到内存中进行调用。
 
+这里需要了解一下`LoadOnStartup`在 Servlet 配置的含义：
+
+> 标记容器是否在启动的时候就加载这个 servlet。 当值为 0 或者大于 0 时，表示容器在应用启动时就加载这个 servlet； 当是一个负数时或者没有指定时，则指示容器在该 servlet 被选择时才加载。 正数的值越小，启动该 servlet 的优先级越高。对应 Tomcat Servlet 的懒加载机制。
+
+因此`LoadOnStartup`属性设置与不设置并不影响`Servlet`的加载，当然为了追求优先级一般都会设置一下，追求更完美不是。
+
 整个`Servlet`的流程分析到这里算是结束了，可以总结完成动态注册`Servlet`的流程如下：
 
 1. 编写恶意的`Servlet`类；
