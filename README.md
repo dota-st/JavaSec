@@ -91,3 +91,10 @@
 - [Tomcat内存马之Servlet](./05-内存马专区/2-Tomcat内存马之Servlet/Servlet内存马.md)
 - [反序列化注入内存马](./05-内存马专区/3-反序列化注入内存马/反序列化注入内存马.md)
 - [Spring内存马之Controller](./05-内存马专区/4-Spring内存马之Controller/Controller内存马.md)
+- 未完待续
+
+## 比赛专区
+
+这里会记录一些比赛中用到的，有关正在学习的 Java 知识点的文章，以作为所学实践。
+
+- [2022 祥云杯 -- ezjava（cc链 + Tomcat全局回显/Spring内存马）](./比赛专区/2022祥云杯--ezjava/index.md)
