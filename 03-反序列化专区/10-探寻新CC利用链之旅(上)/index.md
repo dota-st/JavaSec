@@ -5,9 +5,9 @@
 最近 ctfshow 群主上新了几道 cc 链题，打到后面的时候开始过滤一些类，如下图所示：
 ![image-20221210174327917](images/image-20221210174327917.png)
 
-使用到的依赖版本是`commons-collection 4.0`版本，经过简单的 fuzz，确定过滤了`TransformingComparator`类。根据网上的公开链，无论是前面学习的`CommonsCollections2`和`CommonsCollections4`，还是`@navalorenzo`发布的`CommonsCollections8`都用到了该类。
+使用到的依赖版本是`commons-collection 4.0`版本，经过简单的 fuzz，确定题目过滤了`TransformingComparator`类。根据网上的公开链，无论是前面学习的`CommonsCollections2`和`CommonsCollections4`，还是`@navalorenzo`发布的`CommonsCollections8`等适用于`commons-collection 4.0`版本的链子都用到了该类。
 
-那么很显然需要我们组合出新的链子，最简单的做法就是根据现有的链子进行修改，这里挑了两个没有用到`TransformingComparator`类的`CommonsCollections3`和`CommonsCollections7`作为例子。
+既然现成链子不行，那么就动手组合出新的链子吧。最简单的做法就是根据现有的链子尝试进行修改，这里挑了两个没有用到`TransformingComparator`类的`CommonsCollections3`和`CommonsCollections7`作为例子。
 
 ## 修改CommonsCollections3
 
