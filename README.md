@@ -40,7 +40,8 @@
 │   ├── 6-CommonsCollections4
 │   ├── 7-CommonsCollections5
 │   ├── 8-CommonsCollections7
-│   └── 9-CommonsCollections11
+│   ├── 9-CommonsCollections11
+│   └── 10-探寻新CC利用链之旅(上)
 ├── 04-shiro专区
 │   ├── 0-shiro之CVE-2010-3863
 │   ├── 1-shiro之CVE-2016-4437
@@ -54,10 +55,11 @@
 │   ├── 4-Spring内存马之Controller
 │   └── 5-Spring内存马之Interceptor
 ├── README.md
-├── 环境&其他
-│   └── Tomcat源码调试
+├── 参考链接.md
 ├── 比赛专区
-└── 参考链接.md
+│   └── 2022祥云杯--ezjava
+└── 环境&其他
+    └── Tomcat源码调试
 ```
 
 ## 环境&其他
@@ -77,6 +79,7 @@
 - [CommonsCollections5 利用链分析](./03-反序列化专区/7-CommonsCollections5/CommonsCollections5.md)
 - [CommonsCollections7 利用链分析](./03-反序列化专区/8-CommonsCollections7/CommonsCollections7.md)
 - [CommonsCollections11 利用链分析](./03-反序列化专区/9-CommonsCollections11/CommonsCollections11.md)
+- [探寻新CC利用链之旅(上)](./03-反序列化专区/10-探寻新CC利用链之旅(上)/index.md)
 
 ## Shiro专区
 

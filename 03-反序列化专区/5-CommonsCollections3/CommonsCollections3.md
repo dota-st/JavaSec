@@ -41,7 +41,7 @@ ObjectInputStream.readObject()
 发现该类会调用`newTransformer()`方法，接着继续跟进看`InstantiateTransformer()`
 ![image-20221010174156050](images/image-20221010174156050.png)
 
-在`InstantiateTransformer#transform()`方法中，通过`getConstructor()`方法进行实例化，而这里的`input`则是前面构造的`TrAXFilter`类，因此可以触发`TransformerImpl#newTransformer()`方法加载构造的恶意字节码进而命令执行。
+在`InstantiateTransformer#transform()`方法中，通过`newInstance()`方法进行实例化，而这里的`input`则是前面构造的`TrAXFilter`类，因此可以触发`TransformerImpl#newTransformer()`方法加载构造的恶意字节码进而命令执行。
 
 在给出的利用链中可以看到触发`xxx.transform()`方法用的是前面`CommonsCollections1`中的`LazyMap.get()`方法，因此可以编写出 POC 了
 ```java
