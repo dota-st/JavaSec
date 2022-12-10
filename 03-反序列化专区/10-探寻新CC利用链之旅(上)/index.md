@@ -120,7 +120,7 @@ public class CommonsCollections4New1 {
 Idea 提示` LazyMap.decorate()`方法错误，我们跟进`org.apache.commons.collections4.map.LazyMap`类看看
 ![image-20221210175836825](images/image-20221210175836825.png)
 
-发现`LazyMap`已经不存在该方法，取代的则是静态的`lazymap()`方法
+发现`collections4`版本`LazyMap`类已经不存在该方法，取而代之的则是静态`lazymap()`方法
 ![image-20221210180043571](images/image-20221210180043571.png)
 
 那我们把`LazyMap.decorate()`方法改成`LazyMap.lazyMap()`方法即可
@@ -230,13 +230,13 @@ public class CommonsCollections4New1 {
 
 ![image-20221210180307038](images/image-20221210180307038.png)
 
-当打过去的时候还是有类被过滤了
+当打过去的时候还是显示有类被过滤了
 ![image-20221210180647246](images/image-20221210180647246.png)
 
-经过 fuzz，发现是`TemplatesImpl`类被过滤了，既然不能加载字节码，那么我们换条链子再继续改一下。
+再经过 fuzz 测试，发现是`TemplatesImpl`类被过滤了，既然不能加载字节码，那么我们换条链子再继续改一下。
 ## 修改CommonsCollections7
 
-`CommonsCollections7`链没有用到`TemplatesImpl`类加载字节码，我们就基于这条链改一下，还是和上面一样，因为`CommonsCollections7`链适用于`commons-collection 4.0`版本，因此我们修改相关类之后，再把 LazyMap 类的实例化方法进行修改，如下所示
+`CommonsCollections7`链也没有用到`TemplatesImpl`类加载字节码，我们就基于这条链改一下，还是和上面一样，因为`CommonsCollections7`链适用于`commons-collection 4.0`版本，因此我们修改相关类之后，再把 LazyMap 类的实例化方法进行修改，如下所示
 
 ```java
 package com.serialize;
@@ -330,6 +330,6 @@ public class CommonsCollections4New2 {
 打开环境看了一下
 ![image-20221210181805540](images/image-20221210181805540.png)
 
-直接给出了过滤的类，基本都是前面已经公开的 CC 链需要用到的，接下来就是动手挖新的链子了。
+这次直接给出了过滤的类，基本都是网上已经公开的所有 CC 链需要用到的，那接下来就是需要动手挖一条新的链子了。
 
 本文从严格意义上来说，并不能说是探寻了新的 CC 利用链，因此写为上篇作为下文引子。
