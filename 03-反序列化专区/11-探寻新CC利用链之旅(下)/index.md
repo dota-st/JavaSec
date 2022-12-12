@@ -31,7 +31,7 @@ LazyMap
 
 写到这里，不难发现 CC 链最终都是在找能够触发`transform()`的调用链，所以我们如果要挖新链，就要往这个方向走。那么如何出发呢？
 
-这里有两个路可以走：
+这里有两条路可以走：
 
 - 通过 IDEA 搜索类的特点，并人工去找可能存在的调用关系
 - 通过 Codeql 等白盒工具进行自动化筛选
@@ -41,7 +41,7 @@ LazyMap
 通过`extractor-java `建立好`commons-collections 4.0`的数据库
 ![image-20221212111732560](images/image-20221212111732560.png)
 
-然后编写查询规则的 ql 文件，写完对应的查询 Source 和 Sink 规则，记得加上黑名单清洗掉不需要的类
+然后编写查询规则的 ql 文件，写完对应的查询 Source 和 Sink 规则，记得再写一个`Sanitizer`加上黑名单清洗掉不需要的类
 ```ql
 class Sanitizer extends SerializableMethod {
      Sanitizer() {
@@ -199,7 +199,7 @@ public class CommonsCollections4New3 {
 前面通过查询结果可以看到并不止这么一条，例如另一条通过`InstantiateFactory`实例化恶意字节码的新链子，不过因为题目过滤了`TemplatesImpl`类所以也没有兴趣去实现，粗看是能实现的，有兴趣的师傅可以自行实现。
 ![image-20221212113600892](images/image-20221212113600892.png)
 
-好吧还是实现一下，不过这里我没有用`CloneTransformer`类，我把上图中的链子修改为如下所示：
+好吧还是实现一下，不过这里我没有用`CloneTransformer`类，而是用了`FactoryTransformer`类，上图中的链子修改为如下的 gadget：
 ```
 Gadget chain:
 	    java.io.ObjectInputStream.readObject()
