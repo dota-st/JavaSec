@@ -41,7 +41,8 @@
 │   ├── 7-CommonsCollections5
 │   ├── 8-CommonsCollections7
 │   ├── 9-CommonsCollections11
-│   └── 10-探寻新CC利用链之旅(上)
+│   ├── 10-探寻新CC利用链之旅(上)
+│   └── 11-探寻新CC利用链之旅(下)
 ├── 04-shiro专区
 │   ├── 0-shiro之CVE-2010-3863
 │   ├── 1-shiro之CVE-2016-4437
@@ -80,6 +81,7 @@
 - [CommonsCollections7 利用链分析](./03-反序列化专区/8-CommonsCollections7/CommonsCollections7.md)
 - [CommonsCollections11 利用链分析](./03-反序列化专区/9-CommonsCollections11/CommonsCollections11.md)
 - [探寻新CC利用链之旅(上)](./03-反序列化专区/10-探寻新CC利用链之旅(上)/index.md)
+- [探寻新CC利用链之旅(下)](./03-反序列化专区/11-探寻新CC利用链之旅(下)/index.md)
 
 ## Shiro专区
 
