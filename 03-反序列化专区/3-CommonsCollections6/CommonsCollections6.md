@@ -25,7 +25,7 @@ JDK版本暂无
             java.util.HashMap.readObject()
                 java.util.HashMap.hash()
                     org.apache.commons.collections.keyvalue.TiedMapEntry.hashCode()
-                    org.apache.commons.collections.keyvalue.TiedMapEntry.getValue()
+                      org.apache.commons.collections.keyvalue.TiedMapEntry.getValue()
                         org.apache.commons.collections.map.LazyMap.get()
                             org.apache.commons.collections.functors.ChainedTransformer.transform()
                             org.apache.commons.collections.functors.InvokerTransformer.transform()
