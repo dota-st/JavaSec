@@ -44,11 +44,12 @@
 │   ├── 10-探寻新CC利用链之旅(上)
 │   ├── 11-探寻新CC利用链之旅(下)
 │   └── 12-CommonsBeanutils
-├── 04-shiro专区
-│   ├── 0-shiro之CVE-2010-3863
-│   ├── 1-shiro之CVE-2016-4437
-│   ├── 2-shiro之key的检测
-│   └── 3-shiro之CVE-2016-6802
+├── 04-Shiro专区
+│   ├── 0-Shiro之CVE-2010-3863
+│   ├── 1-Shiro之CVE-2016-4437
+│   ├── 2-Shiro之key的检测
+│   ├── 3-Shiro自身反序列化利用链
+│   └── 4-Shiro之CVE-2016-6802
 ├── 05-内存马专区
 │   ├── 0-Tomcat内存马之Listener
 │   ├── 1-Tomcat内存马之Filter
@@ -87,11 +88,11 @@
 
 ## Shiro专区
 
-- [CVE-2010-3863（权限绕过）漏洞分析](./04-shiro专区/0-shiro之CVE-2010-3863/CVE-2010-3863.md)
-- [CVE-2016-4437（shiro-550）漏洞分析](./04-shiro专区/1-shiro之CVE-2016-4437/CVE-2016-4437.md)
-- [shiro 之 key 的检测](./04-shiro专区/2-shiro之key的检测/shiro之key的检测.md)
-- [CVE-2016-6802（权限绕过）漏洞分析](./04-shiro专区/3-shiro之CVE-2016-6802/CVE-2016-6802.md)
-- 留坑
+- [CVE-2010-3863（权限绕过）漏洞分析](./04-Shiro专区/0-Shiro之CVE-2010-3863/CVE-2010-3863.md)
+- [CVE-2016-4437（Shiro-550）漏洞分析](./04-Shiro专区/1-Shiro之CVE-2016-4437/CVE-2016-4437.md)
+- [Shiro之 key 的检测](./04-Shiro专区/2-Shiro之key的检测/Shiro之key的检测.md)
+- [Shiro自身反序列化利用链](./04-Shiro专区/3-Shiro自身反序列化利用链/index.md)
+- [CVE-2016-6802（权限绕过）漏洞分析](./04-Shiro专区/4-Shiro之CVE-2016-6802/CVE-2016-6802.md)
 
 ## 内存马专区
 

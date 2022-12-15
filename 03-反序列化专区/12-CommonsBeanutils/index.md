@@ -32,11 +32,15 @@ public class User {
 
 在该类中，定义了一个私有属性`name`和两个方法：读取`name`和设置`name`。在 Java 中，我们把符合驼峰式命名法，以 get 开头的方法名叫做`getter`，以 set 开头的方法名叫做`setter`。
 
-`Commons Beanutils`为开发人员提供了一个静态方法：`PropertyUtils.getProperty`，通过该方法可以调用任意`JavaBean`中的`getter()`方法。因此我们可以通过如下代码调用 User 类的`getName()`方法获取 username 的值
+`Commons Beanutils`为开发人员提供了一个静态方法：`PropertyUtils.getProperty()`，通过该方法可以调用任意`JavaBean`中的`getter()`方法。因此我们可以通过如下代码调用 User 类的`getName()`方法获取 username 的值
 
 ```java
 PropertyUtils.getProperty(new User(), "name");
 ```
+
+> 除此之外， PropertyUtils.getProperty() 还支持递归获取属性，比如 a 对象中有属性 b，b 对象中有属性 c，我们可以通过 PropertyUtils.getProperty(a, "b.c"); 的方式进行递归获取。
+>
+> 通过这个方法，使用者可以很方便地调用任意对象的getter，适用于在不确定 JavaBean 是哪个类对象时使用。
 
 ## 利用链分析
 
