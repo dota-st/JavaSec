@@ -88,11 +88,11 @@
 
 ## Shiro专区
 
-- [CVE-2010-3863（权限绕过）漏洞分析](./04-Shiro专区/0-Shiro之CVE-2010-3863/CVE-2010-3863.md)
-- [CVE-2016-4437（Shiro-550）漏洞分析](./04-Shiro专区/1-Shiro之CVE-2016-4437/CVE-2016-4437.md)
-- [Shiro之 key 的检测](./04-Shiro专区/2-Shiro之key的检测/Shiro之key的检测.md)
+- [CVE-2010-3863（权限绕过）漏洞分析](./04-Shiro专区/0-Shiro之CVE-2010-3863/index.md)
+- [CVE-2016-4437（Shiro-550）漏洞分析](./04-Shiro专区/1-Shiro之CVE-2016-4437/index.md)
+- [Shiro之 key 的检测](./04-Shiro专区/2-Shiro之key的检测/index.md)
 - [Shiro自身反序列化利用链](./04-Shiro专区/3-Shiro自身反序列化利用链/index.md)
-- [CVE-2016-6802（权限绕过）漏洞分析](./04-Shiro专区/4-Shiro之CVE-2016-6802/CVE-2016-6802.md)
+- [CVE-2016-6802（权限绕过）漏洞分析](./04-Shiro专区/4-Shiro之CVE-2016-6802/index.md)
 
 ## 内存马专区
 
