@@ -44,7 +44,7 @@ JDK版本暂无
 
 可以看到在`getValue()`中调用了`map.get()`方法，并且`map`和`key`都是通过构造函数传入，完全可控，所以可以通过构造传参调用到`LazyMap#get()`，满足了我们的期望。
 
-接下来就是寻找可以调用`TiedMapEntry#hashCode()`，在前面已经学习过的[URLDNS利用链分析](./02-反序列化专区/0-URLDNS利用链/URLDNS利用链.md)章节中，我们已经知道在`HashMap#readObject()`里，`putVal()`方法对`key`进行了`hash()`计算，进而调用传进来的`key`的`hashCode()`的方法。
+接下来就是寻找可以调用`TiedMapEntry#hashCode()`，在前面已经学习过的 [URLDNS利用链分析](../0-URLDNS利用链/URLDNS利用链.md) 章节中，我们已经知道在`HashMap#readObject()`里，`putVal()`方法对`key`进行了`hash()`计算，进而调用传进来的`key`的`hashCode()`的方法。
 
 因此我们只要让`key`为`TiedMapEntry`对象，就可以完成整个攻击链。开始编写初始 POC：
 ```java

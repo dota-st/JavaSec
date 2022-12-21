@@ -57,6 +57,8 @@
 │   ├── 3-反序列化注入内存马
 │   ├── 4-Spring内存马之Controller
 │   └── 5-Spring内存马之Interceptor
+├── 06-FastJson专区
+│   └── 0-FastJson-1.2.24
 ├── README.md
 ├── 参考链接.md
 ├── 比赛专区
@@ -102,6 +104,10 @@
 - [反序列化注入内存马](./05-内存马专区/3-反序列化注入内存马/反序列化注入内存马.md)
 - [Spring内存马之Controller](./05-内存马专区/4-Spring内存马之Controller/Controller内存马.md)
 - [Spring内存马之Interceptor](./05-内存马专区/5-Spring内存马之Interceptor/Interceptor内存马.md)
+
+## FastJson专区
+
+- [FastJson-1.2.24 利用链分析](./06-FastJson专区/0-FastJson-1.2.24/index.md)
 
 ## 比赛专区
 

@@ -2,7 +2,7 @@
 
 ## 前言
 
-关于 Servlet 的知识，同样在前面[Servlet](../../01-JavaWeb基础/0-Servlet/Servlet.md)章节已经学习过，这里不再赘述，直接进入分析环节。
+关于 Servlet 的知识，同样在前面 [Servlet](../../01-JavaWeb基础/0-Servlet/Servlet.md) 章节已经学习过，这里不再赘述，直接进入分析环节。
 
 ## Servlet流程分析
 

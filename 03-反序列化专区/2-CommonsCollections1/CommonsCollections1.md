@@ -44,7 +44,7 @@ public InvocationHandler getObject(final String command) throws Exception {
 	}
 ```
 
-可以看到前面部分和我们在[《CommonsCollections链分析》](./01-Java安全基础/5-Java反序列化/1-CommonsCollections.md)中构造的一样，不一样的是不再利用`transformedMap`类去调用`transform()`方法，而是使用了`LazyMap`中的方法，同时使用到了动态代理的知识。
+可以看到前面部分和我们在[《CommonsCollections链分析》](../1-CommonsCollections/CommonsCollections.md)中构造的一样，不一样的是不再利用`transformedMap`类去调用`transform()`方法，而是使用了`LazyMap`中的方法，同时使用到了动态代理的知识。
 
 ## LazyMap
 
