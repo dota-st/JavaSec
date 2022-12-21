@@ -220,6 +220,7 @@ if (methodName.length() >= 4 && !Modifier.isStatic(method.getModifiers()) && met
 先看看网上的相关漏洞描述：
 
 > 影响版本：`fastjson <= 1.2.24`
+>
 > 描述：fastjson 默认使用 `@type` 指定反序列化任意类，攻击者可以通过在 Java 常见环境中寻找能够构造恶意类的方法，通过反序列化的过程中调用的 getter/setter 方法，以及目标成员变量的注入来达到传参的目的，最终形成恶意调用链。
 
 既然 FastJson 的漏洞的触发关键点之一在于会调用 getter 和 setter 方法，在我们前面的学习过的知识中，你第一个想到的会是谁？
