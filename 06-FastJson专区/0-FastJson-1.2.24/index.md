@@ -181,7 +181,7 @@ class User {
 
 做了几个判断，具体代码为：
 ```java
-	if (methodName.length() >= 4 && !Modifier.isStatic(method.getModifiers()) && (method.getReturnType().equals(Void.TYPE) || method.getReturnType().equals(method.getDeclaringClass())))
+if (methodName.length() >= 4 && !Modifier.isStatic(method.getModifiers()) && (method.getReturnType().equals(Void.TYPE) || method.getReturnType().equals(method.getDeclaringClass())))
 ```
 
 要求方法名长度不能小于4、不能为静态方法、返回的类型为 void 或者自己本身，接着又通过`types.length == 1`要求传入的参数个数必须为一个以及方法名第四个字符要大写等等，继续往下走
@@ -292,6 +292,63 @@ public class FastJson124 {
 ![image-20221221165555279](images/image-20221221165555279.png)
 
 成功执行恶意类中的弹出计算器命令。
+
+写到这里，其实我们还是没有了解 FastJson 是如何进行反序列化的，下面我们以上面的`FastJson124`类为例子跟一下具体流程
+
+我们从`parseObject()`方法看起
+![image-20221221173541692](images/image-20221221173541692.png)
+
+在该方法中，实例化了一个`DefaultJSONParser`对象，我们跟进该构造方法
+![image-20221221174529708](images/image-20221221174529708.png)
+
+设置了`lexer.token`的值为 12，回到`parseObject()`方法继续往下走![image-20221221173702419](images/image-20221221173702419.png)
+
+调用了`DefaultJSONParser#parseObject()`方法处理我们参数中的`Object`类，跟进该方法
+![image-20221221175754360](images/image-20221221175754360.png)
+
+在该方法中，通过`config.getDeserializer()`方法获取对应类型的的反序列化器，跟进该方法看看
+![image-20221221175902221](images/image-20221221175902221.png)
+
+我们传入的 type 是`Object.class`，因此直接找到了对应的反序列化器并进行 return 返回
+
+![image-20221221174021767](images/image-20221221174021767.png)
+
+接着通过`derializer.deserialze()`方法来反序列化我们传入的类，继续往下走到`DefaultJSONParser#parse()`方法
+![image-20221221174736347](images/image-20221221174736347.png)
+
+根据前面设置的`lexer.token`为 12，我们进入`case 12`
+![image-20221221174843549](images/image-20221221174843549.png)
+
+在`case 12`中，新建了一个`JSONObject`对象，然后再次调用`parseObject()`方法进行解析，继续跟进该方法
+![image-20221221180136606](images/image-20221221180136606.png)
+
+和前面一样的流程，我们再次跟进`getDeserializer()`方法
+![image-20221221180225729](images/image-20221221180225729.png)
+
+因为这次传入的 type 是`TemplatesImpl.class`，找不到对应的反序列化器，进入第二个 if 判断，调用`getDeserializer()`方法，跟进该方法
+![image-20221221180700574](images/image-20221221180700574.png)
+
+依然获取不到对应的反序列化构造器，往下走
+![image-20221221180741766](images/image-20221221180741766.png)
+
+这里获取了类的名称，如果含有`$`会替换为空，接着又开始通过遍历`denyList`进行判断，如果以其中的元素开头，就会抛出错误，也就是一个黑名单机制，而`denyList`中的元素是`java.lang.Thread`。
+
+一直往下走
+![image-20221221181029775](images/image-20221221181029775.png)
+
+因为`TemplatesImpl.class`都不满足前面的条件，最后会调用`createJavaBeanDeserializer()`方法创建一个反序列化器，跟进该方法
+![image-20221221181205048](images/image-20221221181205048.png)
+
+发现会调用`JavaBeanInfo.build()`方法，也就是我们前面一开始分析过的流程，最后获取完对应的反序列化器之后，开始进入`deserializer.deserialze()`方法中
+![image-20221221181742589](images/image-20221221181742589.png)
+
+在`deserializer.deserialze()`方法里，最终调用`createInstance()`方法进行实例化
+![image-20221221182133968](images/image-20221221182133968.png)
+
+下面就是`createInstance()`方法的实例化流程
+![image-20221221182247243](images/image-20221221182247243.png)
+
+至此，FastJson 反序列化流程算是告一段落。
 
 ## FastJson反序列化之BECL
 
