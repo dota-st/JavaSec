@@ -36,7 +36,8 @@
 │   ├── 4-JNI安全基础
 │   ├── 5-Java反序列化
 │   ├── 6-JShell
-│   └── 7-Java字节码
+│   ├── 7-Java字节码
+│   └── 8-RMI
 ├── 03-反序列化专区
 │   ├── 0-URLDNS利用链
 │   ├── 1-CommonsCollections

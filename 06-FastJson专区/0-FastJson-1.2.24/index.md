@@ -211,7 +211,7 @@ if (methodName.length() >= 4 && !Modifier.isStatic(method.getModifiers()) && met
 
 ### Feature.SupportNonPublicField
 
-该字段在 FastJson 1.2.22 版本开始引入，这也是为什么如果用到该参数的链子只影响 1.2.22 - 1.2.24 版本的原因所在。
+该字段在 FastJson 1.2.22 版本开始引入，这也是为什么用到该参数的链子只影响 1.2.22 - 1.2.24 版本的原因之一。
 
 在目标类的私有变量没有`setter()`方法时，通过`JSON.parseObject(evilJson, Evil.class, Feature.SupportNonPublicField)`可以给该变量进行赋值。
 
