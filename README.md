@@ -37,8 +37,7 @@
 │   ├── 4-JNI安全基础
 │   ├── 5-Java反序列化
 │   ├── 6-JShell
-│   ├── 7-Java字节码
-│   └── 8-RMI基础
+│   └── 7-Java字节码
 ├── 03-反序列化专区
 │   ├── 0-URLDNS利用链
 │   ├── 1-CommonsCollections
@@ -52,7 +51,9 @@
 │   ├── 9-CommonsCollections11
 │   ├── 10-探寻新CC利用链之旅(上)
 │   ├── 11-探寻新CC利用链之旅(下)
-│   └── 12-CommonsBeanutils
+│   ├── 12-CommonsBeanutils
+│   ├── 13-RMI基础
+│   └── 14-JNDI基础
 ├── 04-Shiro专区
 │   ├── 0-Shiro之CVE-2010-3863
 │   ├── 1-Shiro之CVE-2016-4437
@@ -97,6 +98,7 @@
 - [探寻新CC利用链之旅(下)](./03-反序列化专区/11-探寻新CC利用链之旅(下)/index.md)
 - [CommonsBeanutils利用链分析](./03-反序列化专区/12-CommonsBeanutils/index.md)
 - [RMI基础](./03-反序列化专区/13-RMI基础/index.md)
+- [JNDI基础](./03-反序列化专区/14-JNDI基础/index.md)
 
 ## Shiro专区
 
